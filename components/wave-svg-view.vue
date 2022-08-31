@@ -344,9 +344,9 @@ export default {
 </script>
 
 <template>
-  <div :style="{ width: '100%', height: `${size}px` }">
-    <svg xmlns="http://www.w3.org/2000/svg" :width="width" :height="size" :viewBox="`${width},${size}`">
-      <rect :width="width" :height="size" style="fill: black; stroke-width: 0;stroke: none;" />
+  <div style="position: relative; top: 0px; left: 0px; width: 100%; height: 100%;">
+    <svg xmlns="http://www.w3.org/2000/svg" :width="width" :height="height">
+      <rect :width="width" :height="height" style="fill: black; stroke-width: 0; stroke: none;" />
       <polyline :points="pathString" style="fill: white; stroke: none; stroke-width: 0;" />
       Sorry, your browser does not support inline SVG.
     </svg>

@@ -45,15 +45,14 @@ export default {
     <WaveSvgView
       bg-color="black"
       drop-color="white"
-      :size="200"
       :rain-size="20"
       :rain-freq="0.02"
       :fps="40"
       :enable-splash="false"
-      style="left: 0px; top: 0px; z-index: 0;"
+      style="left: 0px; top: 0px; width: 100%; height: 200px; z-index: 0;"
     />
-    <TodoBoardView />
     <span>TODO 를 남겨요!</span>
+    <TodoBoardView />
   </div>
 </template>
 
