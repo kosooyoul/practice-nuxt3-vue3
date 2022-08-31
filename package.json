@@ -1,0 +1,27 @@
+{
+  "name": "todo",
+  "version": "",
+  "description": "todo",
+  "author": "kosooyoul <kosooyoul@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
+  },
+  "dependencies": {
+    "@pinia/nuxt": "*",
+    "pinia": "*"
+  },
+  "devDependencies": {
+    "@antfu/eslint-config": "*",
+    "@vueuse/core": "*",
+    "@vueuse/nuxt": "*",
+    "eslint": "*",
+    "nuxt": "3.0.0-rc.6",
+    "typescript": "*"
+  }
+}
