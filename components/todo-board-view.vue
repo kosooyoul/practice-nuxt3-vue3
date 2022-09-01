@@ -164,14 +164,26 @@ export default {
   display: flex;
   flex-direction: row;
   align-items: stretch;
+  padding: 4px;
+  background-color: white;
+  border-radius: 4px;
+  overflow: hidden;
+}
+@media screen and (max-width: 800px) {
+  .board {
+    flex-direction: column;
+  }
 }
 .section {
   width: 100%;
+  padding: 4px;
   border: 1px solid black;
+  border-radius: 4px;
+  overflow: hidden;
 }
 .list-item {
   position: relative;
-  padding: 10px;
+  padding: 4px;
   border: 1px solid black;
   border-radius: 4px;
   height: 50px;

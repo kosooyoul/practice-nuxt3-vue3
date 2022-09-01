@@ -343,10 +343,10 @@ export default {
 </script>
 
 <template>
-  <div style="position: relative; top: 0px; left: 0px; width: 100%; height: 100%;">
+  <div>
     <svg xmlns="http://www.w3.org/2000/svg" :width="width" :height="height">
-      <rect :width="width" :height="height" style="fill: black; stroke-width: 0; stroke: none;" />
-      <polyline :points="pathString" style="fill: white; stroke: none; stroke-width: 0;" />
+      <rect :width="width" :height="height" style="stroke-width: 0; stroke: none;" :style="{ fill: bgColor }" />
+      <polyline :points="pathString" style="stroke: none; stroke-width: 0;" :style="{ fill: dropColor }" />
       Sorry, your browser does not support inline SVG.
     </svg>
   </div>

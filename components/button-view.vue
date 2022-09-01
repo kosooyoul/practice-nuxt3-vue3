@@ -62,7 +62,8 @@ export default {
   min-width: 60px;
   max-width: 100%;
   border: 1px solid black;
-  border-radius: 5px;
+  border-radius: 4px;
+  background-color: white;
   line-height: 16px;
   padding: 8px 12px;
   white-space: nowrap;

@@ -60,6 +60,9 @@ export default {
 
 <template>
   <div>
+    <ButtonView title="TODO 를 남겨요!" @click="onClickNewTodoButton" />
+    <TodoBoardView :items="todoItems" style="position: relative; z-index: 1;" @item-updated="onTodoItemUpdated" />
+    <!-- <TodoInputView :visible="todoInputVisibility" @item-confirmed="onTodoItemConfirmed" /> -->
     <WaveSvgView
       bg-color="black"
       drop-color="white"
@@ -67,14 +70,11 @@ export default {
       :rain-freq="0.02"
       :fps="40"
       :enable-splash="false"
-      style="left: 0px; top: 0px; width: 100%; height: 200px; z-index: 0;"
+      style="position: fixed; left: 0px; bottom: 0px; width: 100%; height: 200px; z-index: 0;"
     />
-    <p>TODO 를 남겨요!</p>
-    <ButtonView title="TODO 추가" @click="onClickNewTodoButton" />
-    <TodoBoardView :items="todoItems" @item-updated="onTodoItemUpdated" />
-    <!-- <TodoInputView :visible="todoInputVisibility" @item-confirmed="onTodoItemConfirmed" /> -->
   </div>
 </template>
 
-<style scoped>
+<style>
+html, body { margin: 0px; padding: 0px; background-color: black; width: 100%; height: 100%; }
 </style>
