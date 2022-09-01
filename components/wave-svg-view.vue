@@ -83,7 +83,7 @@ export default {
       default: true,
     },
   },
-  data() {
+  data(): any {
     return {
       root: null,
       width: 0,
@@ -105,10 +105,10 @@ export default {
   watch: {
 
   },
-  created() {
+  created(): void {
     this.log('created: 뷰 라이프사이클, 돔이 그려지기 직전')
   },
-  mounted() {
+  mounted(): void {
     this.log('mounted: 뷰 라이프사이클, 돔까지 그려진 상태')
 
     this.root = this.$el as HTMLElement
@@ -138,20 +138,19 @@ export default {
     this.loop(() => this.animate(), () => this.fps, () => this.play)
     this.loop(() => this.drop(), () => this.rainFreq * this.fps, () => this.play)
   },
-  updated() {
+  updated(): void {
     this.log('updated: 뷰 라이프사이클, 데이터가 변경되고 돔이 다시 그려진 상태')
   },
-  unmounted() {
+  unmounted(): void {
     this.log('unmounted: 뷰 라이프사이클, 돔이 제거되는 상태')
     this.play = false
   },
-  // setup() {},
   methods: {
-    log(...args: any[]) {
+    log(...args: any[]): void {
       // eslint-disable-next-line no-console
       console.log.apply(null, args)
     },
-    loop(func: Function, fpsFunc: Function, playFunc: Function) {
+    loop(func: Function, fpsFunc: Function, playFunc: Function): void {
       if (playFunc()) {
         setTimeout(() => {
           func()
@@ -159,7 +158,7 @@ export default {
         }, 1000 / fpsFunc())
       }
     },
-    reload() {
+    reload(): void {
       const springs = this.springs
 
       this.surfaceStartY = this.height * 0.5
@@ -189,17 +188,17 @@ export default {
       }
       springs.length = this.waveCount
     },
-    drop() {
+    drop(): void {
       const drops = this.drops
       const x = Math.random() * this.width
       const y = 0
       drops[drops.length] = new Drop(x, y)
     },
-    animate() {
+    animate(): void {
       this.update()
       // this.draw()
     },
-    update() {
+    update(): void {
       if (this.width !== this.root.clientWidth || this.height !== this.root.clientHeight) {
         this.width = this.root.clientWidth
         this.height = this.root.clientHeight
@@ -215,7 +214,7 @@ export default {
 
       this.pathString = `0,${this.height} ${this.springs.map((spring: any) => `${spring.x},${spring.height}`).join(' ')} ${this.width},${this.height}`
     },
-    updateParticles() {
+    updateParticles(): void {
       const particles = this.particles
       for (let i = 0; i < particles.length; i++) {
         const thisDrop = particles[i]
@@ -227,7 +226,7 @@ export default {
           particles.splice(i, 1)
       }
     },
-    updateWater() {
+    updateWater(): void {
       const springs = this.springs
       for (let i = 0; i < springs.length; i++)
         springs[i].update()
@@ -262,7 +261,7 @@ export default {
         }
       }
     },
-    updateDrops() {
+    updateDrops(): void {
       for (let i = 0; i < this.drops.length; i++) {
         const thisDrop = this.drops[i]
         thisDrop.x += thisDrop.vx
@@ -280,7 +279,7 @@ export default {
         }
       }
     },
-    collide() {
+    collide(): void {
       const drops = this.drops
       const springs = this.springs
       const particles = this.particles
@@ -310,7 +309,7 @@ export default {
         }
       }
     },
-    splash(index: number, sp: number) {
+    splash(index: number, sp: number): void {
       const springs = this.springs
       if (index >= 0 && index < springs.length) {
         springs[index].speed = sp
@@ -318,7 +317,7 @@ export default {
           this.createSplashParticles(index, sp)
       }
     },
-    createSplashParticles(x: number, speed: number) {
+    createSplashParticles(x: number, speed: number): void {
       const y = this.springs[x].height
       x = x * WAVE_FREQ
       if (speed > 60) {
