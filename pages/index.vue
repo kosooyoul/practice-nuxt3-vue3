@@ -7,7 +7,7 @@ export default {
   props: {
 
   },
-  data() {
+  data(): any {
     return {
       todoItems: [
         { id: '1', title: '집에 가야해', status: 'TODO' },
@@ -27,26 +27,32 @@ export default {
   watch: {
 
   },
-  created() {
+  created(): void {
     this.log('created: 뷰 라이프사이클, 돔이 그려지기 직전')
   },
-  mounted() {
+  mounted(): void {
     this.log('mounted: 뷰 라이프사이클, 돔까지 그려진 상태')
   },
-  updated() {
+  updated(): void {
     this.log('updated: 뷰 라이프사이클, 데이터가 변경되고 돔이 다시 그려진 상태')
   },
-  unmounted() {
+  unmounted(): void {
     this.log('unmounted: 뷰 라이프사이클, 돔이 제거되는 상태')
   },
   // setup() {},
   methods: {
-    log(...args: any[]) {
+    log(...args: any[]): void {
       // eslint-disable-next-line no-console
       console.log.apply(null, args)
     },
-    onTodoItemUpdated(item: any) {
+    onTodoItemUpdated(item: any): void {
       this.log('onTodoItemUpdated', item)
+    },
+    onClickNewTodoButton(): void {
+      this.log('onClickNewTodoButton')
+    },
+    todoInputVisibility(): void {
+      this.log('onClickNewTodoButton')
     },
   },
 }
@@ -63,8 +69,10 @@ export default {
       :enable-splash="false"
       style="left: 0px; top: 0px; width: 100%; height: 200px; z-index: 0;"
     />
-    <span>TODO 를 남겨요!</span>
+    <p>TODO 를 남겨요!</p>
+    <ButtonView title="TODO 추가" @click="onClickNewTodoButton" />
     <TodoBoardView :items="todoItems" @item-updated="onTodoItemUpdated" />
+    <!-- <TodoInputView :visible="todoInputVisibility" @item-confirmed="onTodoItemConfirmed" /> -->
   </div>
 </template>
 
