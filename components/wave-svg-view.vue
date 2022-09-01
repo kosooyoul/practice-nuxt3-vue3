@@ -213,7 +213,7 @@ export default {
 
       this.collide()
 
-      this.pathString = `0,${this.height} ${this.springs.map(spring => `${spring.x},${spring.height}`).join(' ')} ${this.width},${this.height}`
+      this.pathString = `0,${this.height} ${this.springs.map((spring: any) => `${spring.x},${spring.height}`).join(' ')} ${this.width},${this.height}`
     },
     updateParticles() {
       const particles = this.particles
