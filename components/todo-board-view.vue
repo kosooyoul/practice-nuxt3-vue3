@@ -2,35 +2,49 @@
 </script>
 
 <script lang="ts">
+type Optional<T> = T | null | undefined
+
+enum TodoItemStatus {
+  TODO = 'TODO',
+  DOING = 'DOING',
+  DONE = 'DONE',
+}
+
 class TodoItem {
-  id: number
+  id: string
   title: string
   status: string
 }
+
 export default {
   name: 'TodoBoardView',
   props: {
-    items: {
-      type: [TodoItem],
-      default: [
-        { id: '1', title: '집에 가야해', status: 'TODO' },
-        { id: '2', title: '뷰 공부해야해', status: 'DOING' },
-        { id: '3', title: '많고 많은 딩동유 지라 이슈 모두모두 다 처리해야해', status: 'DOING' },
-        { id: '4', title: '다이어트 해야해', status: 'DOING' },
-        { id: '5', title: '자야해', status: 'TODO' },
-        { id: '6', title: '저녁 먹어야 해', status: 'DONE' },
-      ],
-    },
+
   },
   data() {
     return {
-
+      items: [
+        { id: '1', title: '집에 가야해', status: 'TODO' },
+        { id: '2', title: '뷰 공부해야해', status: 'DOING' },
+        { id: '3', title: '많고 많은 지라 이슈 모두모두 다 처리해야해', status: 'DOING' },
+        { id: '4', title: '다이어트 해야해', status: 'DOING' },
+        { id: '5', title: '자야해', status: 'TODO' },
+        { id: '6', title: '저녁 먹어야 해', status: 'DONE' },
+        { id: '7', title: '아침 먹어야 해', status: 'TODO' },
+        { id: '8', title: '점심 먹어야 해', status: 'TODO' },
+      ],
     }
   },
   computed: {
-    todos() { return this.items.filter(item => item.status === 'TODO') },
-    doings() { return this.items.filter(item => item.status === 'DOING') },
-    dones() { return this.items.filter(item => item.status === 'DONE') },
+    todos(): TodoItem[] {
+      return this.items.filter((item: TodoItem) => item.status === 'TODO')
+    },
+    doings(): TodoItem[] {
+      return this.items.filter((item: TodoItem) => item.status === 'DOING')
+    },
+    dones(): TodoItem[] {
+      return this.items.filter((item: TodoItem) => item.status === 'DONE')
+    },
   },
   watch: {
 
@@ -53,6 +67,24 @@ export default {
       // eslint-disable-next-line no-console
       console.log.apply(null, args)
     },
+    findItem(itemId: string): Optional<TodoItem> {
+      return this.items.find((item: TodoItem) => item.id === itemId)
+    },
+    setStatus(itemId: string, status: TodoItemStatus): void {
+      this.log(itemId, status)
+      const item: Optional<TodoItem> = this.findItem(itemId)
+      if (item)
+        item.status = status
+    },
+    setTodo(itemId: string): void {
+      this.setStatus(itemId, TodoItemStatus.TODO)
+    },
+    setDoing(itemId: string): void {
+      this.setStatus(itemId, TodoItemStatus.DOING)
+    },
+    setDone(itemId: string): void {
+      this.setStatus(itemId, TodoItemStatus.DONE)
+    },
   },
 }
 </script>
@@ -70,8 +102,12 @@ export default {
               <span>{{ item.title }}</span>
             </div>
             <div class="buttons">
-              <button>진행</button>
-              <button>완료</button>
+              <button @click="setDoing(item.id)">
+                진행
+              </button>
+              <button @click="setDone(item.id)">
+                완료
+              </button>
             </div>
           </div>
         </div>
@@ -84,13 +120,17 @@ export default {
           <div class="draggable" />
           <div class="card">
             <div class="buttons">
-              <button>대기</button>
+              <button @click="setTodo(item.id)">
+                대기
+              </button>
             </div>
             <div class="title">
               <span>{{ item.title }}</span>
             </div>
             <div class="buttons">
-              <button>완료</button>
+              <button @click="setDone(item.id)">
+                완료
+              </button>
             </div>
           </div>
         </div>
@@ -103,8 +143,12 @@ export default {
           <div class="draggable" />
           <div class="card">
             <div class="buttons">
-              <button>대기</button>
-              <button>진행</button>
+              <button @click="setTodo(item.id)">
+                대기
+              </button>
+              <button @click="setDoing(item.id)">
+                진행
+              </button>
             </div>
             <div class="title">
               <span>{{ item.title }}</span>
