@@ -19,62 +19,60 @@ class TodoItem {
 export default {
   name: 'TodoBoardView',
   props: {
-
+    items: {
+      type: Array,
+      required: false,
+      default: (): TodoItem[] => [],
+    },
   },
-  data() {
+  emits: ['itemUpdated'],
+  data(): any {
     return {
-      items: [
-        { id: '1', title: '집에 가야해', status: 'TODO' },
-        { id: '2', title: '뷰 공부해야해', status: 'DOING' },
-        { id: '3', title: '많고 많은 지라 이슈 모두모두 다 처리해야해', status: 'DOING' },
-        { id: '4', title: '다이어트 해야해', status: 'DOING' },
-        { id: '5', title: '자야해', status: 'TODO' },
-        { id: '6', title: '저녁 먹어야 해', status: 'DONE' },
-        { id: '7', title: '아침 먹어야 해', status: 'TODO' },
-        { id: '8', title: '점심 먹어야 해', status: 'TODO' },
-      ],
+
     }
   },
   computed: {
-    todos(): TodoItem[] {
-      return this.items.filter((item: TodoItem) => item.status === 'TODO')
-    },
-    doings(): TodoItem[] {
-      return this.items.filter((item: TodoItem) => item.status === 'DOING')
-    },
-    dones(): TodoItem[] {
-      return this.items.filter((item: TodoItem) => item.status === 'DONE')
-    },
+    todos(): TodoItem[] { return this.filterItemsByStatus(TodoItemStatus.TODO) },
+    doings(): TodoItem[] { return this.filterItemsByStatus(TodoItemStatus.DOING) },
+    dones(): TodoItem[] { return this.filterItemsByStatus(TodoItemStatus.DONE) },
   },
   watch: {
-
+    items: {
+      handler(_items: TodoItem[]): void {
+        this.log('watch/items: 속성 갱신됨')
+      },
+      deep: true,
+    },
   },
-  created() {
+  created(): void {
     this.log('created: 뷰 라이프사이클, 돔이 그려지기 직전')
   },
-  mounted() {
+  mounted(): void {
     this.log('mounted: 뷰 라이프사이클, 돔까지 그려진 상태')
   },
-  updated() {
+  updated(): void {
     this.log('updated: 뷰 라이프사이클, 데이터가 변경되고 돔이 다시 그려진 상태')
   },
-  unmounted() {
+  unmounted(): void {
     this.log('unmounted: 뷰 라이프사이클, 돔이 제거되는 상태')
   },
-  // setup() {},
   methods: {
-    log(...args: any[]) {
+    log(...args: any[]): void {
       // eslint-disable-next-line no-console
       console.log.apply(null, args)
     },
     findItem(itemId: string): Optional<TodoItem> {
       return this.items.find((item: TodoItem) => item.id === itemId)
     },
+    filterItemsByStatus(status: TodoItemStatus): TodoItem[] {
+      return this.items.filter((item: TodoItem) => item.status === status)
+    },
     setStatus(itemId: string, status: TodoItemStatus): void {
-      this.log(itemId, status)
       const item: Optional<TodoItem> = this.findItem(itemId)
-      if (item)
+      if (item && item.status !== status) {
         item.status = status
+        this.$emit('itemUpdated', item)
+      }
     },
     setTodo(itemId: string): void {
       this.setStatus(itemId, TodoItemStatus.TODO)
