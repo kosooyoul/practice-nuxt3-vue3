@@ -9,6 +9,8 @@ export default {
   },
   data(): any {
     return {
+      todoBoardView: null,
+      todoInputDialogView: null,
       todoItems: [
         { id: '1', title: '집에 가야해', status: 'TODO' },
         { id: '2', title: '뷰 공부해야해', status: 'DOING' },
@@ -32,6 +34,8 @@ export default {
   },
   mounted(): void {
     this.log('mounted: 뷰 라이프사이클, 돔까지 그려진 상태')
+    this.todoBoardView = this.$refs.todoBoardView
+    this.todoInputDialogView = this.$refs.todoInputDialogView
   },
   updated(): void {
     this.log('updated: 뷰 라이프사이클, 데이터가 변경되고 돔이 다시 그려진 상태')
@@ -50,11 +54,13 @@ export default {
     },
     showTodoInputDialog(): void {
       this.log('showTodoInputDialog')
+      this.todoInputDialogView.open()
     },
-    newTodoItem(item: any): void {
-      this.log('newTodoItem', item)
+    confirmTodoItem(item: any): void {
+      this.log('confirmTodoItem', item)
       item.id = Date.now()
       this.todoItems.push(item)
+      this.todoInputDialogView.close()
     },
   },
 }
@@ -63,8 +69,10 @@ export default {
 <template>
   <div>
     <ButtonView title="TODO 를 남겨요!" @click="showTodoInputDialog" />
-    <TodoInputView @item-confirmed="newTodoItem" />
-    <TodoBoardView :items="todoItems" style="position: relative; z-index: 1;" @item-updated="updateTodoItem" />
+    <DialogView ref="todoInputDialogView">
+      <TodoInputView @item-confirmed="confirmTodoItem" />
+    </DialogView>
+    <TodoBoardView ref="todoBoardView" :items="todoItems" style="position: relative; z-index: 1;" @item-updated="updateTodoItem" />
     <div style="height: 200px;" />
     <WaveSvgView
       bg-color="transparent"
@@ -73,9 +81,9 @@ export default {
       :rain-freq="0.02"
       :fps="40"
       :enable-splash="false"
-      style="position: fixed; left: 0px; bottom: 0px; width: 100%; height: 200px; z-index: 0;"
+      style="position: absolute; left: 0px; bottom: 0px; width: 100%; height: 200px; z-index: 0;"
     />
-    <div style="position: fixed; bottom: 0px; left: 0px; width: 100%;">
+    <div style="position: absolute; bottom: 0px; left: 0px; width: 100%;">
       <p style="text-align: center; font-size: 12px; color: white; text-shadow: -1px -1px 0px black;">
         Hello World
       </p>
