@@ -76,17 +76,17 @@ export default {
     <div style="height: 200px;" />
     <WaveSvgView
       bg-color="transparent"
-      drop-color="rgb(120, 255, 230, 0.8)"
+      drop-color="rgb(120, 255, 230)"
       :rain-size="20"
       :rain-freq="0.02"
       :fps="40"
       :enable-splash="false"
-      style="position: absolute; left: 0px; bottom: 0px; width: 100%; height: 200px; z-index: 0;"
+      style="position: fixed; left: 0px; bottom: 0px; width: 100%; height: 200px; z-index: 0;"
     />
-    <div style="position: absolute; bottom: 0px; left: 0px; width: 100%;">
-      <p style="text-align: center; font-size: 12px; color: white; text-shadow: -1px -1px 0px black;">
+    <div style="position: fixed; bottom: 0px; left: 0px; width: 100%; z-index: 10;">
+      <div style="text-align: center; font-size: 12px; padding: 12px; color: white; background-color: rgb(120, 255, 230); text-shadow: -1px -1px 0px black;">
         Hello World
-      </p>
+      </div>
     </div>
   </div>
 </template>
