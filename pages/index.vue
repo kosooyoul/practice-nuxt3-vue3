@@ -11,16 +11,7 @@ export default {
     return {
       todoBoardView: null,
       todoInputDialogView: null,
-      todoItems: [
-        { id: '1', title: '집에 가야해', status: 'TODO' },
-        { id: '2', title: '뷰 공부해야해', status: 'DOING' },
-        { id: '3', title: '많고 많은 지라 이슈 모두모두 다 처리해야해', status: 'DOING' },
-        { id: '4', title: '다이어트 해야해', status: 'DOING' },
-        { id: '5', title: '자야해', status: 'TODO' },
-        { id: '6', title: '저녁 먹어야 해', status: 'DONE' },
-        { id: '7', title: '아침 먹어야 해', status: 'TODO' },
-        { id: '8', title: '점심 먹어야 해', status: 'TODO' },
-      ],
+      todoItems: [],
     }
   },
   computed: {
@@ -31,6 +22,7 @@ export default {
   },
   created(): void {
     this.log('created: 뷰 라이프사이클, 돔이 그려지기 직전')
+    this.loadTodoItems()
   },
   mounted(): void {
     this.log('mounted: 뷰 라이프사이클, 돔까지 그려진 상태')
@@ -49,8 +41,26 @@ export default {
       // eslint-disable-next-line no-console
       console.log.apply(null, args)
     },
+    getLocalData<T>(key: string, defaultValue: T = null): T {
+      try {
+        return JSON.parse(localStorage.getItem(key))
+      }
+      catch (e) {
+        return defaultValue
+      }
+    },
+    setLocalData(key: string, data: any): void {
+      localStorage.setItem(key, JSON.stringify(data))
+    },
+    loadTodoItems(): void {
+      this.todoItems = this.getLocalData('todoItems', [])
+    },
+    saveTodoItems(): void {
+      this.setLocalData('todoItems', this.todoItems)
+    },
     updateTodoItem(item: any): void {
       this.log('updateTodoItem', item)
+      this.saveTodoItems()
     },
     showTodoInputDialog(): void {
       this.log('showTodoInputDialog')
@@ -61,6 +71,7 @@ export default {
       item.id = Date.now()
       this.todoItems.push(item)
       this.todoInputDialogView.close()
+      this.saveTodoItems()
     },
   },
 }
