@@ -45,14 +45,16 @@ export default {
       // eslint-disable-next-line no-console
       console.log.apply(null, args)
     },
-    onTodoItemUpdated(item: any): void {
-      this.log('onTodoItemUpdated', item)
+    updateTodoItem(item: any): void {
+      this.log('updateTodoItem', item)
     },
-    onClickNewTodoButton(): void {
-      this.log('onClickNewTodoButton')
+    showTodoInputDialog(): void {
+      this.log('showTodoInputDialog')
     },
-    todoInputVisibility(): void {
-      this.log('onClickNewTodoButton')
+    newTodoItem(item: any): void {
+      this.log('newTodoItem', item)
+      item.id = Date.now()
+      this.todoItems.push(item)
     },
   },
 }
@@ -60,21 +62,27 @@ export default {
 
 <template>
   <div>
-    <ButtonView title="TODO 를 남겨요!" @click="onClickNewTodoButton" />
-    <TodoBoardView :items="todoItems" style="position: relative; z-index: 1;" @item-updated="onTodoItemUpdated" />
-    <!-- <TodoInputView :visible="todoInputVisibility" @item-confirmed="onTodoItemConfirmed" /> -->
+    <ButtonView title="TODO 를 남겨요!" @click="showTodoInputDialog" />
+    <TodoInputView @item-confirmed="newTodoItem" />
+    <TodoBoardView :items="todoItems" style="position: relative; z-index: 1;" @item-updated="updateTodoItem" />
+    <div style="height: 200px;" />
     <WaveSvgView
-      bg-color="black"
-      drop-color="white"
+      bg-color="transparent"
+      drop-color="rgb(120, 255, 230, 0.8)"
       :rain-size="20"
       :rain-freq="0.02"
       :fps="40"
       :enable-splash="false"
       style="position: fixed; left: 0px; bottom: 0px; width: 100%; height: 200px; z-index: 0;"
     />
+    <div style="position: fixed; bottom: 0px; left: 0px; width: 100%;">
+      <p style="text-align: center; font-size: 12px; color: white; text-shadow: -1px -1px 0px black;">
+        Hello World
+      </p>
+    </div>
   </div>
 </template>
 
 <style>
-html, body { margin: 0px; padding: 0px; background-color: black; width: 100%; height: 100%; }
+html, body { margin: 0px; padding: 0px; background-color: white; width: 100%; height: 100%; }
 </style>

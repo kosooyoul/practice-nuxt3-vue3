@@ -196,15 +196,17 @@ export default {
   width: 100%;
   height: 100%;
   background-color: lightgray;
-  z-index: -1;
+  z-index: 0;
 }
 .card {
   display: flex;
+  position: relative;
   flex-direction: row;
   align-items: center;
   border: 1px solid #000;
   background-color: beige;
   height: 100%;
+  z-index: 1;
 }
 .card>.title {
   width: 100%;

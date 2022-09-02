@@ -50,15 +50,15 @@ export default {
 </script>
 
 <template>
-  <div class="button" @click="onClick">
+  <button class="button" @click="onClick">
     {{ title }}
-  </div>
+  </button>
 </template>
 
 <style scoped>
 .button {
   display: inline-block;
-  height: 16px;
+  height: 32px;
   min-width: 60px;
   max-width: 100%;
   border: 1px solid black;
