@@ -84,6 +84,9 @@ export default {
       <option value="DONE">
         완료
       </option>
+      <option value="HOLD">
+        보류
+      </option>
     </select>
     <ButtonView title="확인!" @click="confirm()" />
   </div>
