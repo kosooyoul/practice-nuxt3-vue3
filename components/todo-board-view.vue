@@ -2,6 +2,8 @@
 </script>
 
 <script lang="ts">
+import Draggable from 'vue3-draggable'
+
 type Optional<T> = T | null | undefined
 
 enum TodoItemStatus {
@@ -18,6 +20,9 @@ class TodoItem {
 }
 
 export default {
+  components: {
+    Draggable,
+  },
   name: 'TodoBoardView',
   props: {
     items: {
@@ -187,6 +192,15 @@ export default {
         </div>
       </div>
     </div>
+    <draggable v-model="items">
+      <template v-slot:item="{ item }">
+        <!-- example -->
+        <div>
+          {{ item.title }}
+        </div>
+        <!-- or your own template -->
+      </template>
+    </draggable>
   </div>
 </template>
 
