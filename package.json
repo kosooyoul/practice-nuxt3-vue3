@@ -13,9 +13,10 @@
     "lint:fix": "eslint . --fix"
   },
   "dependencies": {
-    "@pinia/nuxt": "*",
     "@nuxtjs-alt/axios": "latest",
-    "pinia": "*"
+    "@pinia/nuxt": "*",
+    "pinia": "*",
+    "vue3-draggable": "^2.0.9"
   },
   "devDependencies": {
     "@antfu/eslint-config": "*",
