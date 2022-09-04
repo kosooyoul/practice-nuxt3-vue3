@@ -104,24 +104,7 @@ export default {
       <div class="list">
         <div v-for="(item, i) in todos" :key="i" class="list-item">
           <div class="draggable" />
-          <div class="card">
-            <div class="buttons">
-              <button @click="setHold(item.id)">
-                보류
-              </button>
-            </div>
-            <div class="title">
-              <span>{{ item.title }}</span>
-            </div>
-            <div class="buttons">
-              <button @click="setDoing(item.id)">
-                진행
-              </button>
-              <button @click="setDone(item.id)">
-                완료
-              </button>
-            </div>
-          </div>
+          <TodoCardView />
         </div>
       </div>
     </div>
@@ -130,24 +113,7 @@ export default {
       <div class="list">
         <div v-for="(item, i) in doings" :key="i" class="list-item">
           <div class="draggable" />
-          <div class="card">
-            <div class="buttons">
-              <button @click="setHold(item.id)">
-                보류
-              </button>
-            </div>
-            <div class="title">
-              <span>{{ item.title }}</span>
-            </div>
-            <div class="buttons">
-              <button @click="setTodo(item.id)">
-                대기
-              </button>
-              <button @click="setDone(item.id)">
-                완료
-              </button>
-            </div>
-          </div>
+          <TodoCardView />
         </div>
       </div>
     </div>
@@ -156,20 +122,7 @@ export default {
       <div class="list">
         <div v-for="(item, i) in dones" :key="i" class="list-item">
           <div class="draggable" />
-          <div class="card">
-            <div class="buttons" />
-            <div class="title">
-              <span>{{ item.title }}</span>
-            </div>
-            <div class="buttons">
-              <button @click="setTodo(item.id)">
-                대기
-              </button>
-              <button @click="setDoing(item.id)">
-                진행
-              </button>
-            </div>
-          </div>
+          <TodoCardView />
         </div>
       </div>
     </div>
@@ -178,18 +131,7 @@ export default {
       <div class="list">
         <div v-for="(item, i) in holds" :key="i" class="list-item">
           <div class="draggable" />
-          <div class="card">
-            <div class="buttons">
-              <button @click="setDoing(item.id)">
-                진행
-              </button>
-            </div>
-            <div class="title">
-              <span>{{ item.title }}</span>
-            </div>
-            <div class="buttons" />
-          </div>
-        </div>
+          <TodoCardView />
       </div>
     </div>
     <draggable v-model="items">
