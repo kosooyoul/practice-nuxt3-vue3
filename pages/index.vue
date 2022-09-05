@@ -92,9 +92,9 @@ export default {
       :rain-freq="0.02"
       :fps="40"
       :enable-splash="false"
-      style="position: fixed; left: 0px; bottom: 0px; width: 100%; height: 200px; z-index: 0;"
+      style="position: absolute; left: 0px; bottom: 0px; width: 100%; height: 200px; z-index: 0;"
     />
-    <div style="position: fixed; bottom: 0px; left: 0px; width: 100%; z-index: 10;">
+    <div style="position: absolute; bottom: 0px; left: 0px; width: 100%; z-index: 10;">
       <div style="text-align: center; font-size: 12px; padding: 12px; color: white; background-color: rgb(120, 255, 230); text-shadow: -1px -1px 0px black;">
         Hello World
       </div>
