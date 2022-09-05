@@ -11,6 +11,7 @@ export default {
       default: null,
     },
   },
+  emits: ['itemUpdated'],
   data(): any {
     return {
       id: null,
@@ -50,8 +51,19 @@ export default {
     },
     updateItem(item: any): void {
       this.id = item?.id || null
-      this.title = item?.title || ''
+      this.title = item?.title || '내용 없음'
       this.status = item?.status || 'TODO'
+    },
+    onStatusUpdated(status: string): void {
+      if (this.status === status)
+        return
+
+      this.status = status
+      this.$emit('itemUpdated', {
+        id: this.id,
+        title: this.title,
+        status: this.status,
+      })
     },
   },
 }
@@ -60,18 +72,24 @@ export default {
 <template>
   <div class="card">
     <div class="buttons">
-      <button @click="setHold(item.id)">
+      <button v-show="status !== 'HOLD' && status !== 'DONE'" @click="onStatusUpdated('HOLD')">
         보류
+      </button>
+      <button v-show="status === 'HOLD'" @click="onStatusUpdated('DOING')">
+        진행
       </button>
     </div>
     <div class="title">
-      <span>{{ item.title }}</span>
+      <span>{{ title }}</span>
     </div>
     <div class="buttons">
-      <button @click="setDoing(item.id)">
+      <button v-show="status !== 'TODO' && status !== 'HOLD'" @click="onStatusUpdated('TODO')">
+        대기
+      </button>
+      <button v-show="status !== 'DOING'" @click="onStatusUpdated('DOING')">
         진행
       </button>
-      <button @click="setDone(item.id)">
+      <button v-show="status !== 'DONE' && status !== 'HOLD'" @click="onStatusUpdated('DONE')">
         완료
       </button>
     </div>

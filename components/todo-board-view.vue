@@ -2,7 +2,7 @@
 </script>
 
 <script lang="ts">
-import Draggable from 'vue3-draggable'
+// import Draggable from 'vue3-draggable'
 
 type Optional<T> = T | null | undefined
 
@@ -20,9 +20,9 @@ class TodoItem {
 }
 
 export default {
-  components: {
-    Draggable,
-  },
+  // components: {
+  //   Draggable,
+  // },
   name: 'TodoBoardView',
   props: {
     items: {
@@ -74,24 +74,13 @@ export default {
     filterItemsByStatus(status: TodoItemStatus): TodoItem[] {
       return this.items.filter((item: TodoItem) => item.status === status)
     },
-    setStatus(itemId: string, status: TodoItemStatus): void {
-      const item: Optional<TodoItem> = this.findItem(itemId)
-      if (item && item.status !== status) {
-        item.status = status
-        this.$emit('itemUpdated', item)
+    onItemUpdated(item: TodoItem): void {
+      const foundItem: Optional<TodoItem> = this.findItem(item.id)
+      if (foundItem) {
+        foundItem.title = item.title
+        foundItem.status = item.status
+        this.$emit('itemUpdated', foundItem)
       }
-    },
-    setTodo(itemId: string): void {
-      this.setStatus(itemId, TodoItemStatus.TODO)
-    },
-    setDoing(itemId: string): void {
-      this.setStatus(itemId, TodoItemStatus.DOING)
-    },
-    setDone(itemId: string): void {
-      this.setStatus(itemId, TodoItemStatus.DONE)
-    },
-    setHold(itemId: string): void {
-      this.setStatus(itemId, TodoItemStatus.HOLD)
     },
   },
 }
@@ -103,8 +92,7 @@ export default {
       <div><span>대기중</span></div>
       <div class="list">
         <div v-for="(item, i) in todos" :key="i" class="list-item">
-          <div class="draggable" />
-          <TodoCardView />
+          <TodoCardView :item="item" @item-updated="onItemUpdated" />
         </div>
       </div>
     </div>
@@ -112,8 +100,7 @@ export default {
       <div><span>진행중</span></div>
       <div class="list">
         <div v-for="(item, i) in doings" :key="i" class="list-item">
-          <div class="draggable" />
-          <TodoCardView />
+          <TodoCardView :item="item" @item-updated="onItemUpdated" />
         </div>
       </div>
     </div>
@@ -121,8 +108,7 @@ export default {
       <div><span>완료</span></div>
       <div class="list">
         <div v-for="(item, i) in dones" :key="i" class="list-item">
-          <div class="draggable" />
-          <TodoCardView />
+          <TodoCardView :item="item" @item-updated="onItemUpdated" />
         </div>
       </div>
     </div>
@@ -130,19 +116,19 @@ export default {
       <div><span>보류</span></div>
       <div class="list">
         <div v-for="(item, i) in holds" :key="i" class="list-item">
-          <div class="draggable" />
-          <TodoCardView />
+          <TodoCardView :item="item" @item-updated="onItemUpdated" />
+        </div>
       </div>
     </div>
-    <draggable v-model="items">
-      <template v-slot:item="{ item }">
-        <!-- example -->
-        <div>
-          {{ item.title }}
-        </div>
-        <!-- or your own template -->
-      </template>
-    </draggable>
+    <!-- <draggable v-model="items"> -->
+    <!-- <template v-slot:item="{ item }"> -->
+    <!-- example -->
+    <!-- <div> -->
+    <!-- {{ item.title }} -->
+    <!-- </div> -->
+    <!-- or your own template -->
+    <!-- </template> -->
+    <!-- </draggable> -->
   </div>
 </template>
 
@@ -184,26 +170,5 @@ export default {
   height: 100%;
   background-color: lightgray;
   z-index: 0;
-}
-.card {
-  display: flex;
-  position: relative;
-  flex-direction: row;
-  align-items: center;
-  border: 1px solid #000;
-  background-color: beige;
-  height: 100%;
-  z-index: 1;
-}
-.card>.title {
-  width: 100%;
-}
-.card>.title {
-  width: 100%;
-  text-align: left;
-  font-size: 14px;
-}
-.card>.buttons {
-  width: 80px;
 }
 </style>
