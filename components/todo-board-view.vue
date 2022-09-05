@@ -34,26 +34,28 @@ export default {
   emits: ['itemUpdated'],
   data(): any {
     return {
-
+      all: [],
+      todos: [],
+      doings: [],
+      dones: [],
+      holds: [],
     }
   },
   computed: {
-    all(): TodoItem[] { return this.items.concat() },
-    todos(): TodoItem[] { return this.filterItemsByStatus(TodoItemStatus.TODO) },
-    doings(): TodoItem[] { return this.filterItemsByStatus(TodoItemStatus.DOING) },
-    dones(): TodoItem[] { return this.filterItemsByStatus(TodoItemStatus.DONE) },
-    holds(): TodoItem[] { return this.filterItemsByStatus(TodoItemStatus.HOLD) },
+
   },
   watch: {
     items: {
       handler(_items: TodoItem[]): void {
         this.log('watch/items: 속성 갱신됨')
+        this.updateItems()
       },
       deep: true,
     },
   },
   created(): void {
     this.log('created: 뷰 라이프사이클, 돔이 그려지기 직전')
+    this.updateItems()
   },
   mounted(): void {
     this.log('mounted: 뷰 라이프사이클, 돔까지 그려진 상태')
@@ -68,6 +70,13 @@ export default {
     log(...args: any[]): void {
       // eslint-disable-next-line no-console
       console.log.apply(null, args)
+    },
+    updateItems(): void {
+      this.all = this.items.concat()
+      this.todos = this.filterItemsByStatus(TodoItemStatus.TODO)
+      this.doings = this.filterItemsByStatus(TodoItemStatus.DOING)
+      this.dones = this.filterItemsByStatus(TodoItemStatus.DONE)
+      this.holds = this.filterItemsByStatus(TodoItemStatus.HOLD)
     },
     findItem(itemId: string): Optional<TodoItem> {
       return this.items.find((item: TodoItem) => item.id === itemId)
