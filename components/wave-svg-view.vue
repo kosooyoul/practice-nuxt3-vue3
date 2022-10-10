@@ -106,11 +106,8 @@ export default {
 
   },
   created(): void {
-    this.log('created: 뷰 라이프사이클, 돔이 그려지기 직전')
   },
   mounted(): void {
-    this.log('mounted: 뷰 라이프사이클, 돔까지 그려진 상태')
-
     this.root = this.$el as HTMLElement
     this.width = this.root.clientWidth
     this.height = this.root.clientHeight
@@ -139,10 +136,8 @@ export default {
     this.loop(() => this.drop(), () => this.rainFreq * this.fps, () => this.play)
   },
   updated(): void {
-    this.log('updated: 뷰 라이프사이클, 데이터가 변경되고 돔이 다시 그려진 상태')
   },
   unmounted(): void {
-    this.log('unmounted: 뷰 라이프사이클, 돔이 제거되는 상태')
     this.play = false
   },
   methods: {

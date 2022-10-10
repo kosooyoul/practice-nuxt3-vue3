@@ -80,7 +80,14 @@ export default {
 
 <template>
   <div>
-    <BubbleButtonView />
+    <section>
+      <h1>BubbleButtonView</h1>
+      <BubbleButtonView @click="log('BubbleButtonView#1@click')">안녕#1</BubbleButtonView>
+      <BubbleButtonView @click="log('BubbleButtonView#2@click')">안녕#2</BubbleButtonView>
+      <BubbleButtonView @click="log('BubbleButtonView#3@click')">안녕#3</BubbleButtonView>
+      <BubbleButtonView @click="log('BubbleButtonView#4@click')">안녕#4</BubbleButtonView>
+      <BubbleButtonView @click="log('BubbleButtonView#5@click')">안녕#5</BubbleButtonView>
+    </section>
     <ButtonView title="TODO 를 남겨요!" @click="showTodoInputDialog" />
     <DialogView ref="todoInputDialogView">
       <TodoInputView @item-confirmed="confirmTodoItem" />
