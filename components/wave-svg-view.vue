@@ -17,7 +17,7 @@ class Drop {
     this.vy = 8
     this.speed = 1
     this.minvy = 4
-    this.maxvy = 18
+    this.maxvy = 8 // 18
     this.splashed = false
     this.x = x
     this.y = y
@@ -49,7 +49,7 @@ const WAV_PASS = 5
 const SPREAD = 0.4
 const DAMP = 0.01
 const TENSION = 0.01
-const SPEED = 1
+const SPEED = 0.2
 
 export default {
   name: 'WaveSvgView',
