@@ -6,24 +6,21 @@
   "license": "MIT",
   "scripts": {
     "build": "nuxt build",
-    "dev": "nuxt dev",
+    "dev": "cross-env PORT=3000 nuxt dev",
+    "prod": "cross-env PORT=3000 node ./.output/server/index.mjs",
     "generate": "nuxt generate",
-    "preview": "nuxt preview",
+    "preview": "cross-env PORT=3000 nuxt preview",
+    "postinstall": "cross-env PORT=3000 nuxt prepare",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix"
   },
   "dependencies": {
-    "@nuxtjs-alt/axios": "latest",
-    "@pinia/nuxt": "*",
-    "pinia": "*",
-    "vue-draggable-next": "^2.1.1"
+    "@nuxtjs-alt/axios": "latest"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "*",
-    "@vueuse/core": "*",
-    "@vueuse/nuxt": "*",
+    "cross-env": "^7.0.3",
     "eslint": "*",
-    "nuxt": "3.0.0-rc.6",
+    "nuxt": "3.0.0-rc.11",
     "typescript": "*"
   }
 }
