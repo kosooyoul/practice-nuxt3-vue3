@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import BubbleButtonView from '~~/components/bubble-button-view.vue';
 </script>
 
 <script lang="ts">
@@ -79,6 +80,7 @@ export default {
 
 <template>
   <div>
+    <BubbleButtonView />
     <ButtonView title="TODO 를 남겨요!" @click="showTodoInputDialog" />
     <DialogView ref="todoInputDialogView">
       <TodoInputView @item-confirmed="confirmTodoItem" />
