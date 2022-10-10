@@ -2,8 +2,6 @@
 </script>
 
 <script lang="ts">
-import { VueDraggableNext } from 'vue-draggable-next'
-
 type Optional<T> = T | null | undefined
 
 enum TodoItemStatus {
@@ -21,14 +19,10 @@ class TodoItem {
 
 export default {
   name: 'TodoBoardView',
-  components: {
-    VueDraggableNext,
-  },
   props: {
     items: {
       type: Array,
       required: false,
-      default: (): TodoItem[] => [],
     },
   },
   emits: ['itemUpdated'],
@@ -72,17 +66,17 @@ export default {
       console.log.apply(null, args)
     },
     updateItems(): void {
-      this.all = this.items.concat()
+      this.all = this.items?.concat()
       this.todos = this.filterItemsByStatus(TodoItemStatus.TODO)
       this.doings = this.filterItemsByStatus(TodoItemStatus.DOING)
       this.dones = this.filterItemsByStatus(TodoItemStatus.DONE)
       this.holds = this.filterItemsByStatus(TodoItemStatus.HOLD)
     },
     findItem(itemId: string): Optional<TodoItem> {
-      return this.items.find((item: TodoItem) => item.id === itemId)
+      return this.items?.find((item: TodoItem) => item.id === itemId)
     },
     filterItemsByStatus(status: TodoItemStatus): TodoItem[] {
-      return this.items.filter((item: TodoItem) => item.status === status)
+      return this.items?.filter((item: TodoItem) => item.status === status)
     },
     onItemUpdated(item: TodoItem): void {
       const foundItem: Optional<TodoItem> = this.findItem(item.id)
@@ -107,41 +101,33 @@ export default {
     <div class="section">
       <div><span>대기중</span></div>
       <div class="list">
-        <VueDraggableNext :list="todos" group="todo" :move="onItemMoved" @end="onItemDrop">
-          <div v-for="item in todos" :key="item.id" class="list-item">
-            <TodoCardView :item="item" @item-updated="onItemUpdated" />
-          </div>
-        </VueDraggableNext>
+        <div v-for="item in todos" :key="item.id" class="list-item">
+          <TodoCardView :item="item" @item-updated="onItemUpdated" />
+        </div>
       </div>
     </div>
     <div class="section">
       <div><span>진행중</span></div>
       <div class="list">
-        <VueDraggableNext :list="doings" group="todo" :move="onItemMoved" @end="onItemDrop">
-          <div v-for="item in doings" :key="item.id" class="list-item">
-            <TodoCardView :item="item" @item-updated="onItemUpdated" />
-          </div>
-        </VueDraggableNext>
+        <div v-for="item in doings" :key="item.id" class="list-item">
+          <TodoCardView :item="item" @item-updated="onItemUpdated" />
+        </div>
       </div>
     </div>
     <div class="section">
       <div><span>완료</span></div>
       <div class="list">
-        <VueDraggableNext :list="dones" group="todo" :move="onItemMoved" @end="onItemDrop">
-          <div v-for="item in dones" :key="item.id" class="list-item">
-            <TodoCardView :item="item" @item-updated="onItemUpdated" />
-          </div>
-        </VueDraggableNext>
+        <div v-for="item in dones" :key="item.id" class="list-item">
+          <TodoCardView :item="item" @item-updated="onItemUpdated" />
+        </div>
       </div>
     </div>
     <div class="section">
       <div><span>보류</span></div>
       <div class="list">
-        <VueDraggableNext :list="holds" group="todo" :move="onItemMoved" @end="onItemDrop">
-          <div v-for="item in holds" :key="item.id" class="list-item">
-            <TodoCardView :item="item" @item-updated="onItemUpdated" />
-          </div>
-        </VueDraggableNext>
+        <div v-for="item in holds" :key="item.id" class="list-item">
+          <TodoCardView :item="item" @item-updated="onItemUpdated" />
+        </div>
       </div>
     </div>
   </div>
