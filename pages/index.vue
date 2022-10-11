@@ -82,11 +82,13 @@ export default {
   <div>
     <section>
       <h2>1. BubbleButtonView</h2>
-      <BubbleButtonView @click="log('BubbleButtonView#1@click')">안녕#1</BubbleButtonView>
-      <BubbleButtonView @click="log('BubbleButtonView#2@click')">안녕#2</BubbleButtonView>
-      <BubbleButtonView @click="log('BubbleButtonView#3@click')">안녕#3</BubbleButtonView>
-      <BubbleButtonView @click="log('BubbleButtonView#4@click')">안녕#4</BubbleButtonView>
-      <BubbleButtonView @click="log('BubbleButtonView#5@click')">안녕#5</BubbleButtonView>
+      <div>
+        <BubbleButtonView @click="log('BubbleButtonView#1@click')">안녕#1</BubbleButtonView>
+        <BubbleButtonView @click="log('BubbleButtonView#2@click')">안녕#2</BubbleButtonView>
+        <BubbleButtonView @click="log('BubbleButtonView#3@click')">안녕#3</BubbleButtonView>
+        <BubbleButtonView @click="log('BubbleButtonView#4@click')">안녕#4</BubbleButtonView>
+        <BubbleButtonView @click="log('BubbleButtonView#5@click')">안녕#5</BubbleButtonView>
+      </div>
     </section>
     <section>
       <h2>2. TODO BoardView</h2>
@@ -108,6 +110,15 @@ export default {
         style="left: 0px; bottom: 0px; width: 100%; height: 200px; z-index: 0;"
       />
     </section>
+    <svg xmlns="http://www.w3.org/2000/svg" version="1.1">
+      <defs>
+        <filter id="bubble" filterUnits="objectBoundingBox" x="0" y="0" width="0" height="0">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur"></feGaussianBlur>
+          <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -6" result="bubble"></feColorMatrix>
+          <feComposite in="SourceGraphic" in2="bubble" operator="atop"></feComposite>
+        </filter>
+      </defs>
+    </svg>
   </div>
 </template>
 
