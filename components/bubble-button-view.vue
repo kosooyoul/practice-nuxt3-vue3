@@ -125,7 +125,6 @@ export default {
         bubble.cx = Math.cos(bubble.radian) * bubble.distance + this.size * 0.5
         bubble.cy = Math.sin(bubble.radian) * bubble.distance + this.size * 0.5
       }
-      console.log('length', this.bubbles.length)
     },
     onClick(): void {
       this.$emit('click')
