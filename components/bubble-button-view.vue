@@ -13,7 +13,7 @@ export default {
     size: {
       type: Number,
       required: false,
-      default: 150,
+      default: 100,
     },
     vibration: {
       type: Number,
@@ -80,7 +80,7 @@ export default {
 
       const spots = []
       for (let i = 0; i < this.spots; i++) {
-        const distance = Math.sin((time + (i % this.variance) * 180 * this.varianceRatio) / 180 * Math.PI) * this.vibration + this.size * 0.25 - this.vibration
+        const distance = Math.sin((time + (i % this.variance) * 180 * this.varianceRatio) / 180 * Math.PI) * this.vibration + this.size * 0.5 - this.vibration
         spots.push(distance)
       }
       spots.push(spots[0])
@@ -97,13 +97,12 @@ export default {
       }
       
       const path = []
-      const shadow = []
       for (let i = 0; i < distances.length; i++) {
         const radian = i / distances.length * Math.PI * 2
         const distance = distances[i] || 0
         
-        const x = Math.cos(radian) * distance + this.size
-        const y = Math.sin(radian) * distance + this.size
+        const x = Math.cos(radian) * distance + this.size * 0.5
+        const y = Math.sin(radian) * distance + this.size * 0.5
 
         path.push([x, y])
       }
@@ -123,8 +122,8 @@ export default {
         bubble.speed *= 0.85;
         bubble.r *= 0.95;
         
-        bubble.cx = Math.cos(bubble.radian) * bubble.distance + this.size
-        bubble.cy = Math.sin(bubble.radian) * bubble.distance + this.size
+        bubble.cx = Math.cos(bubble.radian) * bubble.distance + this.size * 0.5
+        bubble.cy = Math.sin(bubble.radian) * bubble.distance + this.size * 0.5
       }
       console.log('length', this.bubbles.length)
     },
@@ -135,10 +134,10 @@ export default {
         this.bubbles.push({
           radian: Math.random() * Math.PI * 2,
           speed: Math.random() * 6 + 6,
-          distance: 0,
-          r: Math.random() * 6 + 6,
-          cx: this.size,
-          cy: this.size,
+          distance: this.size * 0.25,
+          r: (Math.random() * 0.5 + 0.5) * this.size * 0.1,
+          cx: this.size * 0.5,
+          cy: this.size * 0.5,
         })
       }
       this.bubbles.splice(0, this.bubbles.length - 60)
@@ -148,8 +147,8 @@ export default {
 </script>
 
 <template>
-  <button class="button" @click="onClick" style="position: relative;" :style="{ width: size + 'px', height: size + 'px' }">
-    <svg xmlns="http://www.w3.org/2000/svg" :width="size * 2" :height="size * 2" style="" :style="{ left: -size / 2 + 'px', top: -size / 2 + 'px' }">
+  <button class="button" @click="onClick" :style="{ width: size + 'px', height: size + 'px' }">
+    <svg xmlns="http://www.w3.org/2000/svg" :width="size" :height="size">
       <polyline class="center" :points="pathString" />
       <circle v-for="(bubble, i) in bubbles" :key="i" :cx="bubble.cx" :cy="bubble.cy" :r="bubble.r" />
       Sorry, your browser does not support inline SVG.
@@ -173,7 +172,8 @@ button.button {
   cursor: pointer;
 }
 button.button>svg {
-  position: absolute;
+  /* position: absolute; */
+  overflow: visible;
   pointer-events: none;
   filter: url(#bubble);
 }
