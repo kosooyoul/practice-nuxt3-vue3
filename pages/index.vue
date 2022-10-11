@@ -115,7 +115,7 @@ export default {
         <filter id="bubble" filterUnits="objectBoundingBox" x="0" y="0" width="0" height="0">
           <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur"></feGaussianBlur>
           <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -6" result="bubble"></feColorMatrix>
-          <feComposite in="SourceGraphic" in2="bubble" operator="atop"></feComposite>
+          <!-- <feComposite in="SourceGraphic" in2="bubble" operator="atop"></feComposite> -->
         </filter>
       </defs>
     </svg>

@@ -113,7 +113,7 @@ export default {
       for (let i = this.bubbles.length - 1; i >= 0; i--) {
         bubble = this.bubbles[i];
 
-        if (bubble.speed < 0.1) {
+        if (bubble.speed < 0.05) {
           this.bubbles.splice(i, 1)
           continue
         }
@@ -132,7 +132,7 @@ export default {
       for (let i = 0; i < 10; i++) {
         this.bubbles.push({
           radian: Math.random() * Math.PI * 2,
-          speed: Math.random() * 6 + 6,
+          speed: Math.random() * 5 + 5,
           distance: this.size * 0.25,
           r: (Math.random() * 0.5 + 0.5) * this.size * 0.1,
           cx: this.size * 0.5,
