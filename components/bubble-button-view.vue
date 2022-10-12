@@ -147,14 +147,18 @@ export default {
 
 <template>
   <button class="button" @click="onClick" :style="{ width: size + 'px', height: size + 'px' }">
-    <svg xmlns="http://www.w3.org/2000/svg" :width="size" :height="size">
-      <polyline class="center" :points="pathString" />
-      <circle v-for="(bubble, i) in bubbles" :key="i" :cx="bubble.cx" :cy="bubble.cy" :r="bubble.r" />
-      Sorry, your browser does not support inline SVG.
-    </svg>
-    <div class="content">
-      <div>
-        <slot />
+    <div>
+      <svg xmlns="http://www.w3.org/2000/svg" :width="size" :height="size">
+        <g filter="url(/assets/bubble-filter.svg#filter)">
+          <polyline class="center" :points="pathString" />
+          <circle v-for="(bubble, i) in bubbles" :key="i" :cx="bubble.cx" :cy="bubble.cy" :r="bubble.r" />
+          Sorry, your browser does not support inline SVG.
+        </g>
+      </svg>
+      <div class="content">
+        <div>
+          <slot />
+        </div>
       </div>
     </div>
   </button>
@@ -162,7 +166,6 @@ export default {
 
 <style scoped>
 button.button {
-  position: relative;
   margin: 0px;
   padding: 0px;
   border: none;
@@ -170,32 +173,34 @@ button.button {
   outline: none;
   cursor: pointer;
 }
-button.button>svg {
+button.button>div {
+  position: relative;
+}
+button.button svg {
   /* position: absolute; */
   overflow: visible;
   pointer-events: none;
-  filter: url(#bubble);
 }
-button.button>svg * {
+button.button svg * {
   fill: rgb(80, 180, 200);
   transition-property: fill;
   transition-duration: 0.2s;
   transition-timing-function: linear;
 }
-button.button:hover>svg * {
+button.button>div:hover>svg * {
   fill: rgb(40, 212, 232);
 }
-button.button:focus>svg * {
+button.button>div:focus>svg * {
   fill: rgb(40, 212, 232);
 }
-button.button:active>svg * {
+button.button>div:active>svg * {
   fill: rgb(40, 216, 192);
 }
-button.button>svg>.center {
+button.button svg .center {
   transition-property: fill, transform;
   transform-origin: center;
 }
-button.button:active>svg>.center {
+button.button>div:active svg .center {
   transform: scale(0.9);
 }
 button.button .content {

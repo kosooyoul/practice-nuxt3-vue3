@@ -110,15 +110,6 @@ export default {
         style="left: 0px; bottom: 0px; width: 100%; height: 200px; z-index: 0;"
       />
     </section>
-    <svg xmlns="http://www.w3.org/2000/svg" version="1.1">
-      <defs>
-        <filter id="bubble" filterUnits="objectBoundingBox" x="0" y="0" width="0" height="0">
-          <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur"></feGaussianBlur>
-          <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -6" result="bubble"></feColorMatrix>
-          <!-- <feComposite in="SourceGraphic" in2="bubble" operator="atop"></feComposite> -->
-        </filter>
-      </defs>
-    </svg>
   </div>
 </template>
 
