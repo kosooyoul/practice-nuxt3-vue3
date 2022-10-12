@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import BubbleButtonView from '~~/components/bubble-button-view.vue';
 </script>
 
 <script lang="ts">
@@ -81,7 +80,11 @@ export default {
 <template>
   <div>
     <section>
-      <h2>1. BubbleButtonView</h2>
+      <h2>1. MyCanvasView with WebGL (TODO)</h2>
+      <MyCanvasView />
+    </section>
+    <section>
+      <h2>2. BubbleButtonView</h2>
       <div>
         <BubbleButtonView @click="log('BubbleButtonView#1@click')">안녕#1</BubbleButtonView>
         <BubbleButtonView @click="log('BubbleButtonView#2@click')">안녕#2</BubbleButtonView>
@@ -91,7 +94,7 @@ export default {
       </div>
     </section>
     <section>
-      <h2>2. TODO BoardView</h2>
+      <h2>3. TODO BoardView</h2>
       <ButtonView title="TODO 를 남겨요!" @click="showTodoInputDialog" />
       <DialogView ref="todoInputDialogView">
         <TodoInputView @item-confirmed="confirmTodoItem" />
@@ -99,7 +102,7 @@ export default {
       <TodoBoardView ref="todoBoardView" :items="todoItems" style="position: relative; z-index: 1;" @item-updated="updateTodoItem" />
     </section>
     <section>
-      <h2>3. WaveSvgView</h2>
+      <h2>4. WaveSvgView</h2>
       <WaveSvgView
         bg-color="transparent"
         drop-color="rgb(120, 255, 230)"
