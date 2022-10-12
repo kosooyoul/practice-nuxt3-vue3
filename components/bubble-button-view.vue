@@ -69,11 +69,11 @@ export default {
       console.log.apply(null, args)
     },
     loop(func: Function): void {
-      setTimeout(() => {
+      requestAnimationFrame(() => {
         if (func() != false) {
           this.loop(func)
         }
-      }, 1000 / 40)
+      })
     },
     animate(): void {
       const time = (Date.now() / 2 + this.random * 1000) % 360
