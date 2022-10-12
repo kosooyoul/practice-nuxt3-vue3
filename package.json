@@ -15,7 +15,8 @@
     "lint:fix": "eslint . --fix"
   },
   "dependencies": {
-    "@nuxtjs-alt/axios": "latest"
+    "@nuxtjs-alt/axios": "latest",
+    "gl-matrix": "^3.4.3"
   },
   "devDependencies": {
     "cross-env": "^7.0.3",
