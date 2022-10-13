@@ -16,12 +16,18 @@
   },
   "dependencies": {
     "@nuxtjs-alt/axios": "latest",
-    "gl-matrix": "^3.4.3"
+    "@types/gsap": "^3.0.0",
+    "@types/three": "^0.139.0",
+    "gl-matrix": "^3.4.3",
+    "gsap": "^3.10.3",
+    "three": "^0.136.0"
   },
   "devDependencies": {
     "cross-env": "^7.0.3",
     "eslint": "*",
+    "lil-gui": "^0.17.0",
     "nuxt": "3.0.0-rc.11",
-    "typescript": "*"
+    "typescript": "*",
+    "vite-plugin-glsl": "^0.5.1"
   }
 }
