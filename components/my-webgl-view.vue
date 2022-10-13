@@ -1,5 +1,5 @@
 <script lang="ts">
-import { mat4 } from 'gl-matrix'
+import { vec3, mat3, mat4 } from 'gl-matrix'
 
 export class Camera {
   name: string
@@ -30,7 +30,7 @@ export class Lighting {
 class Renderer {
   gl: any = null
   camera: any = null
-  clearColor: number[] = [1.0, 0.8, 0.0, 1.0]
+  clearColor: number[] = [0, 0, 0, 0] // [1.0, 0.8, 0.0, 1.0]
   rootLayer: any = null
   lastTime: number = 0
   // resource: any = null
@@ -163,10 +163,10 @@ class Layer {
 			gl.uniformMatrix4fv(shader.program.mvMatrixUniform, false, gl.modelviewMatrix);
 			
 			//normal
-      // var normalMatrix = mat3.create();
-      // mat4.toInverseMat3(gl.modelviewMatrix, normalMatrix);
-      // mat3.transpose(normalMatrix);
-      // gl.uniformMatrix3fv(shader.program.nMatrixUniform, false, normalMatrix);
+      var normalMatrix = mat3.create();
+      mat3.normalFromMat4(normalMatrix, gl.modelviewMatrix);
+      mat3.transpose(normalMatrix, normalMatrix);
+      gl.uniformMatrix3fv(shader.program.nMatrixUniform, false, normalMatrix);
 
       //set buffer
       if(mesh != null && mesh.isLoaded == true) {
@@ -188,15 +188,15 @@ class Layer {
       {
 				gl.uniform1i(shader.program.useLightingUniform, this.isLighting);
 				if (this.isLighting) {
-					// gl.uniform3f(shader.program.ambientColorUniform, lighting.ambient[0], lighting.ambient[1], lighting.ambient[2]);
+					gl.uniform3f(shader.program.ambientColorUniform, lighting.ambient[0], lighting.ambient[1], lighting.ambient[2]);
 	
-					// var adjustedLighting = vec3.create();
+					var adjustedLighting = vec3.create();
 					
-					// vec3.normalize(lighting.direction, adjustedLighting);
-					// vec3.scale(adjustedLighting, lighting.specular);
-					// gl.uniform3fv(shader.program.lightingDirectionUniform, adjustedLighting);
+					vec3.normalize(lighting.direction, adjustedLighting);
+					vec3.scale(adjustedLighting, adjustedLighting, lighting.specular);
+					gl.uniform3fv(shader.program.lightingDirectionUniform, adjustedLighting);
 	
-					// gl.uniform3f(shader.program.directionalColorUniform, lighting.diffuse[0], lighting.diffuse[1], lighting.diffuse[2]);
+					gl.uniform3f(shader.program.directionalColorUniform, lighting.diffuse[0], lighting.diffuse[1], lighting.diffuse[2]);
 				}
 			}
 	
@@ -489,11 +489,12 @@ class Shader {
 }
 
 export default {
-  name: 'MyCanvasView',
+  name: 'MyWebglView',
   data() {
     return {
       canvas: null,
       context: null,
+      renderer: null,
       width: 0,
       height: 0,
       play: true,
@@ -516,6 +517,7 @@ export default {
   methods: {
     createWebGL(canvas: HTMLCanvasElement) {
       const renderer = new Renderer(canvas, {})
+      this.renderer = renderer
       
       var mycamera = new Camera("DefaultCamera");
       renderer.camera = mycamera;
@@ -542,7 +544,8 @@ export default {
         '  //gl_FragColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));',
         '  //lv.3 +Lighting',
         '  vec4 textureColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));',
-        '  gl_FragColor = vec4(textureColor.rgb * vLightWeighting, textureColor.a * uAlpha);',
+        // '  gl_FragColor = vec4(textureColor.rgb * vLightWeighting, textureColor.a * uAlpha);',
+        '  gl_FragColor = vec4(vec3(1, vTextureCoord.s, vTextureCoord.t) * vLightWeighting, textureColor.a * uAlpha);',
         '}',
       ].join('\n');
       myshader.vshSrc = [
@@ -590,29 +593,35 @@ export default {
         // layer.texture = mytexture;
         renderer.rootLayer = layer;
 
-        // mat4.rotate(layer.animationMatrix, this.degToRad(3), [0.0, 1.0, 0.0]);
-        // layer.enableAnimation = true;
+        mat4.rotate(layer.animationMatrix, layer.animationMatrix, this.degToRad(3), [0.0, 1.0, 0.0]);
+        layer.enableAnimation = true;
         
         var layer1 = new Layer("Layer1");
         var layer2 = new Layer("Layer2");
         layer.addSubLayer(layer1);
         layer1.addSubLayer(layer2);
 
-        mat4.rotate(layer2.animationMatrix, layer2.animationMatrix, this.degToRad(60), [0.0, 0.0, 1.0]);
+        mat4.rotate(layer2.animationMatrix, layer2.animationMatrix, this.degToRad(6), [0.0, 0.0, 1.0]);
         layer2.enableAnimation = true;
       }
       
-      renderer.drawFrame()
+      requestAnimationFrame(() => this.animate())
     },
     degToRad(degrees) {
       return degrees * Math.PI / 180;
-    }
+    },
+    animate() {
+      this.renderer.drawFrame()
+	    this.renderer.animate()
+
+      requestAnimationFrame(() => this.animate())
+    },
   },
 }
 </script>
 
 <template>
-  <canvas width="600" height="400" />
+  <canvas width="300" height="200" />
 </template>
 
 <style scoped>
