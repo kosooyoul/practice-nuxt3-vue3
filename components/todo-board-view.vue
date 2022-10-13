@@ -125,7 +125,6 @@ export default {
   display: flex;
   flex-direction: row;
   align-items: stretch;
-  padding: 4px;
   background-color: white;
   border-radius: 4px;
   overflow: hidden;
