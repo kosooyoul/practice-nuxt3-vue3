@@ -19,9 +19,6 @@ export default {
       status: null,
     }
   },
-  computed: {
-
-  },
   watch: {
     item: {
       handler(item: Object): void {
@@ -31,18 +28,8 @@ export default {
       deep: true,
     },
   },
-  created(): void {
-    this.log('created: 뷰 라이프사이클, 돔이 그려지기 직전')
-    this.updateItem(this.item)
-  },
   mounted(): void {
-    this.log('mounted: 뷰 라이프사이클, 돔까지 그려진 상태')
-  },
-  updated(): void {
-    this.log('updated: 뷰 라이프사이클, 데이터가 변경되고 돔이 다시 그려진 상태')
-  },
-  unmounted(): void {
-    this.log('unmounted: 뷰 라이프사이클, 돔이 제거되는 상태')
+    this.updateItem(this.item)
   },
   methods: {
     log(...args: any[]): void {
