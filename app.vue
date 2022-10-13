@@ -3,9 +3,17 @@
 
 <template>
   <div>
-    <NuxtPage />
+		<NuxtLayout name="default">
+      <NuxtPage />
+    </NuxtLayout>
   </div>
 </template>
 
-<style scoped>
+<style>
+html, body {
+  margin: 0px;
+}
+h2 {
+  font-size: 16px;
+}
 </style>
