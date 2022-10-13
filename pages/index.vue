@@ -82,7 +82,7 @@ export default {
     <section>
       <h2>1. MyThreeJSView</h2>
       <MyThreejsView />
-      <MyThreejs2View />
+      <!-- <MyThreejsSampleView /> -->
     </section>
     <section>
       <h2>2. MyWebGLView</h2>
