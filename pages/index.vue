@@ -80,23 +80,20 @@ export default {
 <template>
   <div>
     <section>
-      <h2>1. MyThreeJSView</h2>
-      <MyThreejsView />
-      <!-- <MyThreejsSampleView /> -->
-    </section>
     <section>
-      <h2>2. MyWebGLView</h2>
+      <h2>1. MyWebGLView</h2>
       <MyWebglView />
+      <MyThreejsSampleView />
+    </section>
+      <h2>2. OrbisView</h2>
+      <OrbisView class="orbis-view" src="/public/textures/20180924.jpg" :width="300" :height="200" />
+      <OrbisView class="orbis-view" :width="300" :height="200"/>
     </section>
     <section>
       <h2>3. BubbleButtonView</h2>
-      <div>
-        <BubbleButtonView @click="log('BubbleButtonView#1@click')">안녕#1</BubbleButtonView>
-        <BubbleButtonView @click="log('BubbleButtonView#2@click')">안녕#2</BubbleButtonView>
-        <BubbleButtonView @click="log('BubbleButtonView#3@click')">안녕#3</BubbleButtonView>
-        <BubbleButtonView @click="log('BubbleButtonView#4@click')">안녕#4</BubbleButtonView>
-        <BubbleButtonView @click="log('BubbleButtonView#5@click')">안녕#5</BubbleButtonView>
-      </div>
+      <BubbleButtonView class="bubble-button-view" @click="log('BubbleButtonView#1@click')">안녕#1</BubbleButtonView>
+      <BubbleButtonView class="bubble-button-view" @click="log('BubbleButtonView#2@click')">안녕#2</BubbleButtonView>
+      <BubbleButtonView class="bubble-button-view" @click="log('BubbleButtonView#3@click')">안녕#3</BubbleButtonView>
     </section>
     <section>
       <h2>4. TODO BoardView</h2>
@@ -110,7 +107,7 @@ export default {
       <h2>5. WaveSvgView</h2>
       <WaveSvgView
         bg-color="transparent"
-        drop-color="rgb(120, 255, 230)"
+        drop-color="#50b4c8"
         :rain-size="20"
         :rain-freq="0.02"
         :fps="40"
@@ -124,5 +121,15 @@ export default {
 <style scoped>
 section {
   margin-bottom: 40px;
+}
+.bubble-button-view {
+  margin: 10px;
+}
+.orbis-view {
+  background-color: rgba(255, 255, 255, 0.6);
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-shadow: 4px 4px 16px 0px rgba(0, 0, 0, 0.2);
+  margin: 10px;
 }
 </style>

@@ -166,11 +166,9 @@ export default {
 
 <style scoped>
 button.button {
-  margin: 0px;
   padding: 0px;
   border: none;
   background: none;
-  outline: none;
   cursor: pointer;
 }
 button.button>div {
@@ -187,20 +185,20 @@ button.button svg * {
   transition-duration: 0.2s;
   transition-timing-function: linear;
 }
-button.button>div:hover>svg * {
+button.button:hover svg * {
   fill: rgb(40, 212, 232);
 }
-button.button>div:focus>svg * {
+button.button:focus svg * {
   fill: rgb(40, 212, 232);
 }
-button.button>div:active>svg * {
+button.button:active svg * {
   fill: rgb(40, 216, 192);
 }
 button.button svg .center {
   transition-property: fill, transform;
   transform-origin: center;
 }
-button.button>div:active svg .center {
+button.button:active svg .center {
   transform: scale(0.9);
 }
 button.button .content {
