@@ -1,14 +1,9 @@
-# Vue3+Nuxt3 Practice
-* implement todo Project with vue3+nuxt3
+# Nuxt3+Vue3 Practice
+* implement todo Project with nuxt3+vue3
 
-### Init nuxt3 project
-
-```
-npm init nuxt3@latest todo
-```
-
-* Project options
-  * UI framework: None
-  * Extra Nuxt modules: @pinia/nuxt, @vueuse/nuxt
-  * Linter: ESLint
-  * Use Prettier: No
+### Practices
+* See https://components.auoi.net
+* Wave Effect with SVG
+* TODO Board
+* Bubble Button View with SVG
+* Orbis View with ThreeJS
