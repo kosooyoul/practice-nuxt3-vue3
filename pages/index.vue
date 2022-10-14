@@ -66,18 +66,24 @@ export default {
     <section>
       <h2>4. OrbisView</h2>
       <OrbisView class="orbis-view" src="/public/textures/20180924.jpg" :width="300" :height="200" />
-      <OrbisView class="orbis-view" :width="300" :height="200"/>
+      <OrbisView class="orbis-view" :width="300" :height="200" />
     </section>
     <section>
       <h2>3. BubbleButtonView</h2>
-      <BubbleButtonView class="bubble-button-view" @click="log('BubbleButtonView#1@click')">안녕#1</BubbleButtonView>
-      <BubbleButtonView class="bubble-button-view" @click="log('BubbleButtonView#2@click')">안녕#2</BubbleButtonView>
-      <BubbleButtonView class="bubble-button-view" @click="log('BubbleButtonView#3@click')">안녕#3</BubbleButtonView>
+      <BubbleButtonView class="bubble-button-view" @click="log('BubbleButtonView#1@click')">
+        안녕#1
+      </BubbleButtonView>
+      <BubbleButtonView class="bubble-button-view" @click="log('BubbleButtonView#2@click')">
+        안녕#2
+      </BubbleButtonView>
+      <BubbleButtonView class="bubble-button-view" @click="log('BubbleButtonView#3@click')">
+        안녕#3
+      </BubbleButtonView>
     </section>
     <section>
       <h2>2. TODO BoardView</h2>
       <ButtonView title="TODO 를 남겨요!" @click="showTodoInputDialog" />
-      <TodoBoardView class="todo-board-view" ref="todoBoardView" :items="todoItems" @item-updated="updateTodoItem" />
+      <TodoBoardView ref="todoBoardView" class="todo-board-view" :items="todoItems" @item-updated="updateTodoItem" />
       <DialogView ref="todoInputDialogView">
         <TodoInputView @item-confirmed="confirmTodoItem" />
       </DialogView>
@@ -87,7 +93,9 @@ export default {
       <WaveSvgView class="wave-svg-view" bg-color="transparent" drop-color="#50b4c8" :rain-size="20" :rain-freq="0.02" :fps="40" :enable-splash="false" />
     </section>
     <footer>
-      <p class="sign">by Kosooyoul</p>
+      <p class="sign">
+        by Kosooyoul
+      </p>
     </footer>
   </div>
 </template>

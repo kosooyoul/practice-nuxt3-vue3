@@ -34,7 +34,7 @@ export default {
       type: Number,
       required: false,
       default: 0.4,
-    }
+    },
   },
   emits: ['click'],
   data(): any {
@@ -56,7 +56,7 @@ export default {
   created(): void {
   },
   mounted(): void {
-    this.loop(() => this.animate(), () => this.fps, () => this.play)
+    this.loop(() => this.animate())
   },
   updated(): void {
   },
@@ -68,14 +68,13 @@ export default {
       // eslint-disable-next-line no-console
       console.log.apply(null, args)
     },
-    loop(func: Function): void {
+    loop(func: () => boolean): void {
       requestAnimationFrame(() => {
-        if (func() != false) {
+        if (func() !== false)
           this.loop(func)
-        }
       })
     },
-    animate(): void {
+    animate(): boolean {
       const time = (Date.now() / 2 + this.random * 1000) % 360
 
       const spots = []
@@ -91,16 +90,15 @@ export default {
         const front = spots[i]
         const rear = spots[i + 1]
 
-        for (let j = 0; j < 1; j+=stepBetweenSpots) {
+        for (let j = 0; j < 1; j += stepBetweenSpots)
           distances.push(front * (1 - j) + rear * j)
-        }
       }
-      
+
       const path = []
       for (let i = 0; i < distances.length; i++) {
         const radian = i / distances.length * Math.PI * 2
         const distance = distances[i] || 0
-        
+
         const x = Math.cos(radian) * distance + this.size * 0.5
         const y = Math.sin(radian) * distance + this.size * 0.5
 
@@ -111,7 +109,7 @@ export default {
 
       let bubble: any = null
       for (let i = this.bubbles.length - 1; i >= 0; i--) {
-        bubble = this.bubbles[i];
+        bubble = this.bubbles[i]
 
         if (bubble.speed < 0.05) {
           this.bubbles.splice(i, 1)
@@ -119,12 +117,14 @@ export default {
         }
 
         bubble.distance += bubble.speed
-        bubble.speed *= 0.85;
-        bubble.r *= 0.95;
-        
+        bubble.speed *= 0.85
+        bubble.r *= 0.95
+
         bubble.cx = Math.cos(bubble.radian) * bubble.distance + this.size * 0.5
         bubble.cy = Math.sin(bubble.radian) * bubble.distance + this.size * 0.5
       }
+
+      return this.play
     },
     onClick(): void {
       this.$emit('click')
@@ -146,7 +146,7 @@ export default {
 </script>
 
 <template>
-  <button class="button" @click="onClick" :style="{ width: size + 'px', height: size + 'px' }">
+  <button class="button" :style="{ width: `${size}px`, height: `${size}px` }" @click="onClick">
     <div>
       <svg xmlns="http://www.w3.org/2000/svg" :width="size" :height="size">
         <g filter="url(/assets/bubble-filter.svg#filter)">

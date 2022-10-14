@@ -10,10 +10,10 @@ export default defineNuxtConfig({
     // },
   },
   modules: ['@nuxtjs-alt/axios'],
-	build: {
-		transpile: ['three', 'gsap'],
-	},
-	vite: {
-		plugins: [glsl()],
-	},
+  build: {
+    transpile: ['three', 'gsap'],
+  },
+  vite: {
+    plugins: [glsl()],
+  },
 })

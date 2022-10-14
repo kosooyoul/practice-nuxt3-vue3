@@ -3,7 +3,7 @@
 
 <template>
   <div>
-		<NuxtLayout name="default">
+    <NuxtLayout name="default">
       <NuxtPage />
     </NuxtLayout>
   </div>

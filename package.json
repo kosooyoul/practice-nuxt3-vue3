@@ -23,6 +23,7 @@
     "three": "^0.136.0"
   },
   "devDependencies": {
+    "@antfu/eslint-config": "*",
     "cross-env": "^7.0.3",
     "eslint": "*",
     "lil-gui": "^0.17.0",
