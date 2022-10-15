@@ -149,7 +149,7 @@ export default {
   <button class="button" :style="{ width: `${size}px`, height: `${size}px` }" @click="onClick">
     <div>
       <svg xmlns="http://www.w3.org/2000/svg" :width="size" :height="size">
-        <g filter="url(/assets/bubble-filter.svg#filter)">
+        <g filter="url(/svg/bubble-filter.svg#filter)">
           <polyline class="center" :points="pathString" />
           <circle v-for="(bubble, i) in bubbles" :key="i" :cx="bubble.cx" :cy="bubble.cy" :r="bubble.r" />
           Sorry, your browser does not support inline SVG.

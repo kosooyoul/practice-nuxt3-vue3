@@ -65,7 +65,7 @@ export default {
     </section>
     <section>
       <h2>4. OrbisView</h2>
-      <OrbisView class="orbis-view" src="/public/textures/20180924.jpg" :width="300" :height="200" />
+      <OrbisView class="orbis-view" src="/textures/20180924.jpg" :width="300" :height="200" />
       <OrbisView class="orbis-view" :width="300" :height="200" />
     </section>
     <section>
