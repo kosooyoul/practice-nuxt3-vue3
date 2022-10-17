@@ -1,0 +1,454 @@
+<script lang="ts">
+class MapChara {
+  static LEFT = 0
+  static RIGHT = 1
+  static UP = 2
+  static DOWN = 3
+
+  px = 0 // Pixel x
+  py = 0 // Pixel y
+  npx = 0 // New pixel x
+  npy = 0 // New pixel y
+  mx = 0 // Map x
+  my = 0 // Map y
+  acc = 0.4 // Acceleration increment x, y per tick
+  ax = 0 // Acceleration x per tick
+  ay = 0 // Acceleration y per tick
+  max = 10 // Max acceleration x per tick
+  may = 10 // Max acceleration y per tick
+
+  direction: number
+
+  accelerateLeft() {
+    this.ax = this.ax > 0 ? (this.ax * 0.8 - this.acc) : Math.max(this.ax - this.acc, -this.max)
+    this.direction = MapChara.LEFT
+  }
+
+  accelerateRight() {
+    this.ax = this.ax < 0 ? (this.ax * 0.8 + this.acc) : Math.min(this.ax + this.acc, this.max)
+    this.direction = MapChara.RIGHT
+  }
+
+  accelerateUp() {
+    this.ay = this.ay > 0 ? (this.ay * 0.8 - this.acc) : Math.max(this.ay - this.acc, -this.may)
+    this.direction = MapChara.UP
+  }
+
+  accelerateDown() {
+    this.ay = this.ay < 0 ? (this.ay * 0.8 + this.acc) : Math.min(this.ay + this.acc, this.may)
+    this.direction = MapChara.DOWN
+  }
+
+  deaccelerateAxisX() {
+    this.ax *= 0.8
+  }
+
+  deaccelerateAxisY() {
+    this.ay *= 0.8
+  }
+
+  reflectAxisX() {
+    this.ax = -this.ax * 0.5
+  }
+
+  reflectAxisY() {
+    this.ay = -this.ay * 0.5
+  }
+
+  move(area: MapArea) {
+    this.npx += this.ax
+    this.npy += this.ay
+
+    // Check Map Boundary
+    if (this.npx < 0) {
+      this.npx = 0
+      this.reflectAxisX()
+    }
+    else if (this.npx + MapArea.CHARA_SIZE > area.pw) {
+      this.npx = area.pw - MapArea.CHARA_SIZE
+      this.reflectAxisX()
+    }
+    if (this.npy < 0) {
+      this.npy = 0
+      this.reflectAxisY()
+    }
+    else if (this.npy + MapArea.CHARA_SIZE > area.ph) {
+      this.npy = area.ph - MapArea.CHARA_SIZE
+      this.reflectAxisY()
+    }
+
+    // Check Props Boundary
+    area.props.forEach((prop) => {
+      const inNewX = Math.round(this.npx) + MapArea.PROP_SIZE > prop.px && Math.round(this.npx) < prop.px + MapArea.PROP_SIZE
+      const inNewY = Math.round(this.npy) + MapArea.PROP_SIZE > prop.py && Math.round(this.npy) < prop.py + MapArea.PROP_SIZE
+
+      const topIn = this.py + MapArea.PROP_SIZE <= prop.py && this.npy + MapArea.PROP_SIZE > prop.py
+      const bottomIn = this.py >= prop.py + MapArea.PROP_SIZE && this.npy < prop.py + MapArea.PROP_SIZE
+
+      const leftIn = this.px + MapArea.PROP_SIZE <= prop.px && this.npx + MapArea.PROP_SIZE > prop.px
+      const rightIn = this.px >= prop.px + MapArea.PROP_SIZE && this.npx < prop.px + MapArea.PROP_SIZE
+
+      if (inNewX && topIn) {
+        this.npy = prop.py - MapArea.PROP_SIZE
+        this.reflectAxisY()
+      }
+      else if (inNewX && bottomIn) {
+        this.npy = prop.py + MapArea.PROP_SIZE
+        this.reflectAxisY()
+      }
+      else if (inNewY && leftIn) {
+        this.npx = prop.px - MapArea.PROP_SIZE
+        this.reflectAxisX()
+      }
+      else if (inNewY && rightIn) {
+        this.npx = prop.px + MapArea.PROP_SIZE
+        this.reflectAxisX()
+      }
+      else if (inNewX && inNewY) {
+        if (this.npx < prop.px + MapArea.PROP_SIZE * 0.5) {
+          this.npx = prop.px - MapArea.PROP_SIZE
+          this.reflectAxisX()
+        }
+        else {
+          this.npx = prop.px + MapArea.PROP_SIZE
+          this.reflectAxisX()
+        }
+        if (this.npy < prop.py + MapArea.PROP_SIZE * 0.5) {
+          this.npy = prop.py - MapArea.PROP_SIZE
+          this.reflectAxisY()
+        }
+        else {
+          this.npy = prop.py + MapArea.PROP_SIZE
+          this.reflectAxisY()
+        }
+      }
+    })
+
+    this.px = this.npx
+    this.py = this.npy
+  }
+
+  act(area: MapArea) {
+    area.addDust(new MapDust(this.px, this.py, this.direction))
+  }
+}
+
+class MapDust {
+  px: number // Pixel x
+  py: number // Pixel x
+  direction: number
+  a: number // Acceleration
+  ma: number // Max acceleration
+  r: number // Rotation
+
+  constructor(px: number, py: number, direction: number) {
+    this.px = px
+    this.py = py
+    this.direction = direction
+    this.a = 100
+    this.ma = 40
+    this.r = Math.random() * 360
+  }
+}
+
+class MapArea {
+  static CHARA_SIZE = 50
+  static PROP_SIZE = 49
+  static CELL_SIZE = 50
+
+  mw: number // Map width, cell count of width, ex; 100
+  mh: number // Map height, cell count of height, ex; 100
+
+  opx = 0 // Camera offset pixel x, ex; 0
+  opy = 0 // Camera offset pixel y, ex; 0
+  topx = 0 // Target camera offset pixel x, ex; 0
+  topy = 0 // Target camera offset pixel y, ex; 0
+
+  bpl = 0 // Camera boundary pixel left, ex; -100
+  bpr = 0 // Camera boundary pixel right, ex; 100
+  bpt = 0 // Camera boundary pixel top, ex; -100
+  bpb = 0 // Camera boundary pixel bottom, ex; 100
+
+  pw: number // Map pixel width, ex; 100 * 5
+  ph: number // Map pixel height, ex; 100 * 5
+
+  props: {
+    name: string
+    mx: number
+    my: number
+    px: number
+    py: number
+    actions: any[]
+  }[]
+
+  dusts: MapDust[] = []
+
+  constructor(mw: number, mh: number) {
+    this.mw = mw
+    this.mh = mh
+
+    this.pw = mw * MapArea.CELL_SIZE
+    this.ph = mh * MapArea.CELL_SIZE
+
+    this.props = []
+  }
+
+  setCamera(px: number, ph: number) {
+    this.bpl = px * 0.5 - 80
+    this.bpr = px * 0.5 + 80
+    this.bpt = ph * 0.5 - 60
+    this.bpb = ph * 0.5 + 60
+  }
+
+  updateCameraPosition(px: number, py: number) {
+    if (px + this.topx + MapArea.CELL_SIZE > this.bpr)
+      this.topx += this.bpr - px - this.topx - MapArea.CELL_SIZE
+    else if (px + this.topx < this.bpl)
+      this.topx += this.bpl - px - this.topx
+
+    if (py + this.topy + MapArea.CELL_SIZE > this.bpb)
+      this.topy += this.bpb - py - this.topy - MapArea.CELL_SIZE
+    else if (py + this.topy < this.bpt)
+      this.topy += this.bpt - py - this.topy
+
+    this.opx += (this.topx - this.opx) * 0.2
+    this.opy += (this.topy - this.opy) * 0.2
+  }
+
+  addProps(props: { name: string; mx: number; my: number; actions: any[] }[]) {
+    props.forEach((prop) => {
+      this.props.push({
+        name: prop.name,
+        mx: prop.mx,
+        my: prop.my,
+        px: prop.mx * MapArea.CELL_SIZE,
+        py: prop.my * MapArea.CELL_SIZE,
+        actions: prop.actions,
+      })
+    })
+  }
+
+  findProp() {
+    // TODO
+    return this.props[0]
+  }
+
+  addDust(dust: MapDust) {
+    this.dusts.push(dust)
+  }
+
+  computeDusts() {
+    this.dusts.forEach((dust) => {
+      if (dust.direction === MapChara.LEFT)
+        dust.px -= Math.min(dust.a, dust.ma)
+      else if (dust.direction === MapChara.RIGHT)
+        dust.px += Math.min(dust.a, dust.ma)
+      else if (dust.direction === MapChara.UP)
+        dust.py -= Math.min(dust.a, dust.ma)
+      else if (dust.direction === MapChara.DOWN)
+        dust.py += Math.min(dust.a, dust.ma)
+
+      dust.r += Math.min(dust.a, dust.ma)
+
+      dust.a *= 0.8
+    })
+  }
+}
+
+export default {
+  name: 'MapView',
+  props: {
+    width: {
+      type: Number,
+      required: false,
+    },
+    height: {
+      type: Number,
+      required: false,
+    },
+  },
+  setup(props: any) {
+    const canvas: { value: HTMLCanvasElement | null } = ref(null)
+
+    const chara = new MapChara()
+    const area = new MapArea(100, 100)
+
+    const keys = {
+      left: false,
+      right: false,
+      up: false,
+      down: false,
+    }
+
+    let play = true
+
+    const init = (pw: number, ph: number) => {
+      area.setCamera(pw, ph)
+      area.addProps([
+        { name: 'red', mx: 4, my: 4, actions: ['Hello? This is red!'] },
+        { name: 'yellow', mx: 6, my: 8, actions: ['Hello? This is yellow!'] },
+        { name: 'cyan', mx: 7, my: 2, actions: ['Hello? This is cyan!'] },
+        { name: 'brown', mx: 10, my: 3, actions: ['Hello? This is brown!'] },
+        { name: 'green', mx: 14, my: 4, actions: ['Hello? This is green!'] },
+        { name: 'green', mx: 14, my: 5, actions: ['Hello? This is green!'] },
+        { name: 'green', mx: 14, my: 6, actions: ['Hello? This is green!'] },
+        { name: 'green', mx: 14, my: 7, actions: ['Hello? This is green!'] },
+        { name: 'green', mx: 15, my: 7, actions: ['Hello? This is green!'] },
+        { name: 'green', mx: 16, my: 7, actions: ['Hello? This is green!'] },
+        { name: 'green', mx: 17, my: 7, actions: ['Hello? This is green!'] },
+        { name: 'green', mx: 18, my: 7, actions: ['Hello? This is green!'] },
+        { name: 'green', mx: 20, my: 7, actions: ['Hello? This is green!'] },
+        { name: 'green', mx: 21, my: 7, actions: ['Hello? This is green!'] },
+        { name: 'green', mx: 22, my: 7, actions: ['Hello? This is green!'] },
+        { name: 'green', mx: 23, my: 7, actions: ['Hello? This is green!'] },
+      ])
+    }
+
+    const compute = () => {
+      // Compute Chara Position by Keys
+      if (keys.left)
+        chara.accelerateLeft()
+      else if (keys.right)
+        chara.accelerateRight()
+      else
+        chara.deaccelerateAxisX()
+
+      if (keys.up)
+        chara.accelerateUp()
+      else if (keys.down)
+        chara.accelerateDown()
+      else
+        chara.deaccelerateAxisY()
+
+      chara.move(area)
+
+      area.updateCameraPosition(chara.px, chara.py)
+
+      area.computeDusts()
+    }
+
+    const render = (context: CanvasRenderingContext2D, pw: number, ph: number) => {
+      context.clearRect(0, 0, pw, ph)
+
+      // Render Map
+      for (let mx = 0; mx < area.mw; mx++) {
+        for (let my = 0; my < area.mh; my++) {
+          context.fillStyle = ((mx + my) % 2) ? 'white' : 'lightgray'
+          context.fillRect(50 * mx + area.opx, 50 * my + area.opy, 50, 50)
+        }
+      }
+
+      // Render Props
+      area.props.forEach((prop) => {
+        context.fillStyle = prop.name
+        context.fillRect(prop.px + area.opx, prop.py + area.opy, 50, 50)
+      })
+
+      // Render Chara
+      context.fillStyle = 'black'
+      context.fillRect(chara.px + area.opx, chara.py + area.opy, 50, 50)
+
+      area.dusts.forEach((dust) => {
+        context.strokeStyle = 'gray'
+        context.save()
+        context.translate(dust.px + area.opx + 25, dust.py + area.opy + 25)
+        context.rotate(dust.r)
+        context.strokeRect(-25, -25, 50, 50)
+        context.restore()
+      })
+    }
+
+    const animate = (context: CanvasRenderingContext2D, pw: number, ph: number) => {
+      compute()
+      render(context, pw, ph)
+
+      if (play)
+        requestAnimationFrame(() => animate(context, pw, ph))
+    }
+
+    onMounted(() => {
+      const pw = canvas.value.width = props.width || canvas.value.clientWidth
+      const ph = canvas.value.height = props.height || canvas.value.clientHeight
+
+      init(pw, ph)
+
+      const context = canvas.value.getContext('2d')
+      animate(context, pw, ph)
+    })
+
+    onUnmounted(() => {
+      play = false
+    })
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.code === 'ArrowUp') {
+        keys.down = false
+        keys.up = true
+      }
+      else if (e.code === 'ArrowDown') {
+        keys.up = false
+        keys.down = true
+      }
+      else if (e.code === 'ArrowLeft') {
+        keys.right = false
+        keys.left = true
+      }
+      else if (e.code === 'ArrowRight') {
+        keys.left = false
+        keys.right = true
+      }
+      else {
+        return
+      }
+
+      e.preventDefault()
+    }
+
+    const onKeyUp = (e: KeyboardEvent) => {
+      if (e.code === 'ArrowUp')
+        keys.up = false
+      else if (e.code === 'ArrowDown')
+        keys.down = false
+      else if (e.code === 'ArrowLeft')
+        keys.left = false
+      else if (e.code === 'ArrowRight')
+        keys.right = false
+      else
+        return
+
+      e.preventDefault()
+    }
+
+    const onKeyActionDown = () => {
+      // keys.right = false
+      // keys.left = false
+      // keys.down = false
+      // keys.up = false
+
+      chara.act(area)
+      // const prop = area.findProp()
+      // if (prop) {
+      //   // eslint-disable-next-line no-alert
+      //   alert(prop.actions[0])
+      // }
+    }
+
+    return {
+      canvas,
+      onKeyDown,
+      onKeyUp,
+      onKeyActionDown,
+    }
+  },
+}
+</script>
+
+<template>
+  <canvas
+    ref="canvas"
+    tabindex="0"
+    @keydown="onKeyDown"
+    @keyup="onKeyUp"
+    @keydown.prevent.space="onKeyActionDown"
+  />
+</template>

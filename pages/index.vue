@@ -64,6 +64,10 @@ export default {
       <MyThreejsSampleView />
     </section>
     <section>
+      <h2>5. MapView</h2>
+      <MapView :width="600" :height="400" />
+    </section>
+    <section>
       <h2>4. OrbisView</h2>
       <OrbisView class="orbis-view" src="/textures/20180924.jpg" :width="300" :height="200" />
       <OrbisView class="orbis-view" :width="300" :height="200" />
