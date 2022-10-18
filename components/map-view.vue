@@ -199,12 +199,12 @@ class MapDust {
 
       if (isInAxisX && isCrossedFromTop) {
         newCenterY = prop.top
-        this.direction = -Math.PI * 0.5 - (this.direction - Math.PI * 0.5)
+        this.direction = -this.direction
         this.movingAcceleration *= 0.2
       }
       else if (isInAxisX && isCrossedFromBottom) {
         newCenterY = prop.bottom
-        this.direction = -Math.PI * 0.5 - (this.direction - Math.PI * 0.5)
+        this.direction = -this.direction
         this.movingAcceleration *= 0.2
       }
       else if (isInAxisY && isCrossedFromLeft) {
