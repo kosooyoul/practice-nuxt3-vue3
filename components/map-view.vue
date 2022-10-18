@@ -1,10 +1,9 @@
 <script lang="ts">
 class MapChara {
-  static LEFT = 0
-  static RIGHT = 1
-  static UP = 2
-  static DOWN = 3
-
+  static LEFT = 1
+  static RIGHT = 2
+  static UP = 4
+  static DOWN = 8
   px = 0 // Pixel x
   py = 0 // Pixel y
   npx = 0 // New pixel x
@@ -21,22 +20,18 @@ class MapChara {
 
   accelerateLeft() {
     this.ax = this.ax > 0 ? (this.ax * 0.8 - this.acc) : Math.max(this.ax - this.acc, -this.max)
-    this.direction = MapChara.LEFT
   }
 
   accelerateRight() {
     this.ax = this.ax < 0 ? (this.ax * 0.8 + this.acc) : Math.min(this.ax + this.acc, this.max)
-    this.direction = MapChara.RIGHT
   }
 
   accelerateUp() {
     this.ay = this.ay > 0 ? (this.ay * 0.8 - this.acc) : Math.max(this.ay - this.acc, -this.may)
-    this.direction = MapChara.UP
   }
 
   accelerateDown() {
     this.ay = this.ay < 0 ? (this.ay * 0.8 + this.acc) : Math.min(this.ay + this.acc, this.may)
-    this.direction = MapChara.DOWN
   }
 
   deaccelerateAxisX() {
@@ -129,7 +124,18 @@ class MapChara {
   }
 
   act(area: MapArea) {
-    area.addDust(new MapDust(this.px, this.py, this.direction))
+    let direction = 0
+    if (this.ax < -2)
+      direction |= MapChara.LEFT
+    else if (this.ax > 2)
+      direction |= MapChara.RIGHT
+
+    if (this.ay < -2)
+      direction |= MapChara.UP
+    else if (this.ay > 2)
+      direction |= MapChara.DOWN
+
+    area.addDust(new MapDust(this.px, this.py, direction))
   }
 }
 
@@ -239,13 +245,13 @@ class MapArea {
 
   computeDusts() {
     this.dusts.forEach((dust) => {
-      if (dust.direction === MapChara.LEFT)
+      if (dust.direction & MapChara.LEFT)
         dust.px -= Math.min(dust.a, dust.ma)
-      else if (dust.direction === MapChara.RIGHT)
+      else if (dust.direction & MapChara.RIGHT)
         dust.px += Math.min(dust.a, dust.ma)
-      else if (dust.direction === MapChara.UP)
+      if (dust.direction & MapChara.UP)
         dust.py -= Math.min(dust.a, dust.ma)
-      else if (dust.direction === MapChara.DOWN)
+      else if (dust.direction & MapChara.DOWN)
         dust.py += Math.min(dust.a, dust.ma)
 
       dust.r += Math.min(dust.a, dust.ma)
@@ -278,6 +284,7 @@ export default {
       right: false,
       up: false,
       down: false,
+      action: false,
     }
 
     let play = true
@@ -323,6 +330,9 @@ export default {
       chara.move(area)
 
       area.updateCameraPosition(chara.px, chara.py)
+
+      if (keys.action)
+        chara.act(area)
 
       area.computeDusts()
     }
@@ -397,6 +407,9 @@ export default {
         keys.left = false
         keys.right = true
       }
+      else if (e.code === 'KeyZ') {
+        keys.action = true
+      }
       else {
         return
       }
@@ -413,31 +426,18 @@ export default {
         keys.left = false
       else if (e.code === 'ArrowRight')
         keys.right = false
+      else if (e.code === 'KeyZ')
+        keys.action = false
       else
         return
 
       e.preventDefault()
     }
 
-    const onKeyActionDown = () => {
-      // keys.right = false
-      // keys.left = false
-      // keys.down = false
-      // keys.up = false
-
-      chara.act(area)
-      // const prop = area.findProp()
-      // if (prop) {
-      //   // eslint-disable-next-line no-alert
-      //   alert(prop.actions[0])
-      // }
-    }
-
     return {
       canvas,
       onKeyDown,
       onKeyUp,
-      onKeyActionDown,
     }
   },
 }
@@ -449,6 +449,5 @@ export default {
     tabindex="0"
     @keydown="onKeyDown"
     @keyup="onKeyUp"
-    @keydown.prevent.space="onKeyActionDown"
   />
 </template>
