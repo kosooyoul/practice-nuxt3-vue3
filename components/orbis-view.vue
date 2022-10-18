@@ -20,34 +20,24 @@ export default {
   },
   setup(props: any) {
     const canvas: { value: HTMLCanvasElement | null } = ref(null)
+    let renderer: THREE.WebGLRenderer = null
+    let camera: THREE.PerspectiveCamera = null
+    let scene: THREE.Scene = null
+    let controls: OrbitControls = null
 
-    onMounted(() => {
-      const width = canvas.value.width = props.width || canvas.value.clientWidth
-      const height = canvas.value.height = props.height || canvas.value.clientHeight
+    const fullscreenModeChanged = () => {
+      if (!document.fullscreenElement)
+        renderer.setSize(props.width, props.height)
+    }
 
-      const renderer = new THREE.WebGLRenderer({
-        canvas: canvas.value,
-        antialias: true,
-        alpha: true,
-      })
-      renderer.setSize(width, height)
-      renderer.setClearColor(0x000000, 0)
+    const sizeChanged = () => {
+      renderer.setSize(canvas.value.clientWidth, canvas.value.clientHeight)
+      camera.aspect = canvas.value.clientWidth / canvas.value.clientHeight
+      camera.updateProjectionMatrix()
+    }
 
+    const getOrbisScene = () => {
       const scene = new THREE.Scene()
-      const camera = new THREE.PerspectiveCamera(60, width / height, 0.1, 1000)
-
-      const controls = new OrbitControls(camera, canvas.value)
-      controls.autoRotate = true
-      controls.autoRotateSpeed = 1
-      controls.dampingFactor = 0.1
-      controls.enableDamping = true
-      controls.zoomSpeed = 4
-      controls.rotateSpeed = -1
-      controls.minDistance = 0
-      controls.maxDistance = 90
-
-      camera.position.set(0, 0, 50)
-      controls.update()
 
       const sphere = new THREE.Group()
       scene.add(sphere)
@@ -71,14 +61,60 @@ export default {
       const mesh = new THREE.Mesh(geometry, material)
       sphere.add(mesh)
 
-      const render = () => {
-        controls.update()
-        renderer.render(scene, camera)
+      return scene
+    }
 
-        requestAnimationFrame(() => render())
-      }
+    const getOrbisControls = (canvas: HTMLCanvasElement, camera: THREE.Camera) => {
+      const controls = new OrbitControls(camera, canvas)
+      controls.autoRotate = true
+      controls.autoRotateSpeed = 1
+      controls.dampingFactor = 0.1
+      controls.enableDamping = true
+      controls.zoomSpeed = 4
+      controls.rotateSpeed = -1
+      controls.minDistance = 0
+      controls.maxDistance = 90
 
-      render()
+      camera.position.set(0, 0, 50)
+      controls.update()
+
+      return controls
+    }
+
+    const animate = () => {
+      sizeChanged()
+
+      controls.update()
+      renderer.render(scene, camera)
+
+      requestAnimationFrame(() => animate())
+    }
+
+    onMounted(() => {
+      const width = props.width || canvas.value.clientWidth
+      const height = props.height || canvas.value.clientHeight
+
+      renderer = new THREE.WebGLRenderer({
+        canvas: canvas.value,
+        antialias: true,
+        alpha: true,
+      })
+      renderer.setSize(width, height)
+      renderer.setClearColor(0x000000, 0)
+
+      camera = new THREE.PerspectiveCamera(60, width / height * 2, 0.1, 1000)
+
+      controls = getOrbisControls(canvas.value, camera)
+      scene = getOrbisScene()
+
+      document.addEventListener('fullscreenchange', fullscreenModeChanged)
+
+      animate()
+    })
+
+    onUnmounted(() => {
+      document.removeEventListener('fullscreenchange', fullscreenModeChanged)
+      renderer.dispose()
     })
 
     return {
@@ -91,3 +127,10 @@ export default {
 <template>
   <canvas ref="canvas" />
 </template>
+
+<style scoped>
+canvas:not(:root):fullscreen {
+  /* TODO: Fullscreen mode styles */
+  filter: sepia(1);
+}
+</style>
