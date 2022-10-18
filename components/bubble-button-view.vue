@@ -149,7 +149,14 @@ export default {
   <button class="button" :style="{ width: `${size}px`, height: `${size}px` }" @click="onClick">
     <div>
       <svg xmlns="http://www.w3.org/2000/svg" :width="size" :height="size">
-        <g filter="url(/svg/bubble-filter.svg#filter)">
+        <defs>
+          <filter id="filter" filterUnits="objectBoundingBox">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur"></feGaussianBlur>
+            <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -6" result="bubble"></feColorMatrix>
+            <!-- <feComposite in="SourceGraphic" in2="bubble" operator="atop"></feComposite> -->
+          </filter>
+        </defs>
+        <g filter="url(#filter)">
           <polyline class="center" :points="pathString" />
           <circle v-for="(bubble, i) in bubbles" :key="i" :cx="bubble.cx" :cy="bubble.cy" :r="bubble.r" />
           Sorry, your browser does not support inline SVG.
