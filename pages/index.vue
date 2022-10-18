@@ -64,8 +64,12 @@ export default {
       <MyThreejsSampleView />
     </section>
     <section>
+      <h2>6. SlideView</h2>
+      <SlideView class="slide-view" />
+    </section>
+    <section>
       <h2>5. MapView</h2>
-      <MapView :width="600" :height="400" />
+      <MapView class="map-view" :width="600" :height="400" />
     </section>
     <section>
       <h2>4. OrbisView</h2>
@@ -109,11 +113,22 @@ section {
   margin-top: 40px;
   margin-bottom: 40px;
 }
-.orbis-view {
-  background-color: rgba(255, 255, 255, 0.6);
-  border: 1px solid #ddd;
+.slide-view {
+  background-color: rgba(0, 0, 0, 0.8);
+  box-shadow: 4px 4px 16px 0px rgba(0, 0, 0, 0.4);
   border-radius: 4px;
-  box-shadow: 4px 4px 16px 0px rgba(0, 0, 0, 0.2);
+  margin: 10px;
+}
+.map-view {
+  background-color: rgba(0, 0, 0, 0.8);
+  box-shadow: 4px 4px 16px 0px rgba(0, 0, 0, 0.4);
+  border-radius: 4px;
+  margin: 10px;
+}
+.orbis-view {
+  background-color: rgba(255, 255, 255, 0.8);
+  border-radius: 4px;
+  box-shadow: 4px 4px 16px 0px rgba(0, 0, 0, 0.4);
   margin: 10px;
 }
 .bubble-button-view {
