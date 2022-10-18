@@ -74,46 +74,46 @@ class MapChara {
 
     // Check Props Boundary
     area.props.forEach((prop) => {
-      const inNewX = Math.round(this.npx) + MapArea.PROP_SIZE > prop.px && Math.round(this.npx) < prop.px + MapArea.PROP_SIZE
-      const inNewY = Math.round(this.npy) + MapArea.PROP_SIZE > prop.py && Math.round(this.npy) < prop.py + MapArea.PROP_SIZE
+      const inNewX = Math.round(this.npx) + MapArea.CHARA_SIZE > prop.pl && Math.round(this.npx) < prop.pr
+      const inNewY = Math.round(this.npy) + MapArea.CHARA_SIZE > prop.pt && Math.round(this.npy) < prop.pb
 
-      const topIn = this.py + MapArea.PROP_SIZE <= prop.py && this.npy + MapArea.PROP_SIZE > prop.py
-      const bottomIn = this.py >= prop.py + MapArea.PROP_SIZE && this.npy < prop.py + MapArea.PROP_SIZE
+      const topIn = this.py + MapArea.CHARA_SIZE <= prop.pt && this.npy + MapArea.CHARA_SIZE > prop.pt
+      const bottomIn = this.py >= prop.pb && this.npy < prop.pb
 
-      const leftIn = this.px + MapArea.PROP_SIZE <= prop.px && this.npx + MapArea.PROP_SIZE > prop.px
-      const rightIn = this.px >= prop.px + MapArea.PROP_SIZE && this.npx < prop.px + MapArea.PROP_SIZE
+      const leftIn = this.px + MapArea.CHARA_SIZE <= prop.pl && this.npx + MapArea.CHARA_SIZE > prop.pl
+      const rightIn = this.px >= prop.pr && this.npx < prop.pr
 
       if (inNewX && topIn) {
-        this.npy = prop.py - MapArea.PROP_SIZE
+        this.npy = prop.pt - MapArea.CHARA_SIZE
         this.reflectAxisY()
       }
       else if (inNewX && bottomIn) {
-        this.npy = prop.py + MapArea.PROP_SIZE
+        this.npy = prop.pb
         this.reflectAxisY()
       }
       else if (inNewY && leftIn) {
-        this.npx = prop.px - MapArea.PROP_SIZE
+        this.npx = prop.pl - MapArea.CHARA_SIZE
         this.reflectAxisX()
       }
       else if (inNewY && rightIn) {
-        this.npx = prop.px + MapArea.PROP_SIZE
+        this.npx = prop.pr
         this.reflectAxisX()
       }
       else if (inNewX && inNewY) {
-        if (this.npx < prop.px + MapArea.PROP_SIZE * 0.5) {
-          this.npx = prop.px - MapArea.PROP_SIZE
+        if (this.npx < prop.px) {
+          this.npx = prop.pl - MapArea.CHARA_SIZE
           this.reflectAxisX()
         }
         else {
-          this.npx = prop.px + MapArea.PROP_SIZE
+          this.npx = prop.pr
           this.reflectAxisX()
         }
-        if (this.npy < prop.py + MapArea.PROP_SIZE * 0.5) {
-          this.npy = prop.py - MapArea.PROP_SIZE
+        if (this.npy < prop.py) {
+          this.npy = prop.pt - MapArea.CHARA_SIZE
           this.reflectAxisY()
         }
         else {
-          this.npy = prop.py + MapArea.PROP_SIZE
+          this.npy = prop.pb
           this.reflectAxisY()
         }
       }
@@ -159,7 +159,6 @@ class MapDust {
 
 class MapArea {
   static CHARA_SIZE = 50
-  static PROP_SIZE = 49
   static CELL_SIZE = 50
 
   mw: number // Map width, cell count of width, ex; 100
@@ -180,10 +179,14 @@ class MapArea {
 
   props: {
     name: string
-    mx: number
-    my: number
     px: number
     py: number
+    pl: number
+    pr: number
+    pt: number
+    pb: number
+    pw: number
+    ph: number
     actions: any[]
   }[]
 
@@ -221,14 +224,18 @@ class MapArea {
     this.opy += (this.topy - this.opy) * 0.2
   }
 
-  addProps(props: { name: string; mx: number; my: number; actions: any[] }[]) {
+  addProps(props: { name: string; px: number; py: number; pw: number; ph: number; actions: any[] }[]) {
     props.forEach((prop) => {
       this.props.push({
         name: prop.name,
-        mx: prop.mx,
-        my: prop.my,
-        px: prop.mx * MapArea.CELL_SIZE,
-        py: prop.my * MapArea.CELL_SIZE,
+        px: prop.px,
+        py: prop.py,
+        pl: prop.px - prop.pw * 0.5,
+        pr: prop.px + prop.pw * 0.5,
+        pt: prop.py - prop.ph * 0.5,
+        pb: prop.py + prop.ph * 0.5,
+        pw: prop.pw,
+        ph: prop.ph,
         actions: prop.actions,
       })
     })
@@ -292,22 +299,20 @@ export default {
     const init = (pw: number, ph: number) => {
       area.setCamera(pw, ph)
       area.addProps([
-        { name: 'red', mx: 4, my: 4, actions: ['Hello? This is red!'] },
-        { name: 'yellow', mx: 6, my: 8, actions: ['Hello? This is yellow!'] },
-        { name: 'cyan', mx: 7, my: 2, actions: ['Hello? This is cyan!'] },
-        { name: 'brown', mx: 10, my: 3, actions: ['Hello? This is brown!'] },
-        { name: 'green', mx: 14, my: 4, actions: ['Hello? This is green!'] },
-        { name: 'green', mx: 14, my: 5, actions: ['Hello? This is green!'] },
-        { name: 'green', mx: 14, my: 6, actions: ['Hello? This is green!'] },
-        { name: 'green', mx: 14, my: 7, actions: ['Hello? This is green!'] },
-        { name: 'green', mx: 15, my: 7, actions: ['Hello? This is green!'] },
-        { name: 'green', mx: 16, my: 7, actions: ['Hello? This is green!'] },
-        { name: 'green', mx: 17, my: 7, actions: ['Hello? This is green!'] },
-        { name: 'green', mx: 18, my: 7, actions: ['Hello? This is green!'] },
-        { name: 'green', mx: 20, my: 7, actions: ['Hello? This is green!'] },
-        { name: 'green', mx: 21, my: 7, actions: ['Hello? This is green!'] },
-        { name: 'green', mx: 22, my: 7, actions: ['Hello? This is green!'] },
-        { name: 'green', mx: 23, my: 7, actions: ['Hello? This is green!'] },
+        { name: 'red', px: 4 * 50, py: 4 * 50, pw: 50, ph: 50, actions: ['Hello? This is red!'] },
+        { name: 'yellow', px: 6 * 50, py: 8 * 50, pw: 50, ph: 50, actions: ['Hello? This is yellow!'] },
+        { name: 'cyan', px: 7 * 50, py: 2 * 50, pw: 50, ph: 50, actions: ['Hello? This is cyan!'] },
+        { name: 'brown', px: 10 * 50, py: 3 * 50, pw: 50, ph: 50, actions: ['Hello? This is brown!'] },
+        { name: 'green', px: 14 * 50, py: 4 * 50, pw: 50, ph: 50, actions: ['Hello? This is green!'] },
+        { name: 'green', px: 14 * 50, py: 5 * 50, pw: 50, ph: 50, actions: ['Hello? This is green!'] },
+        { name: 'green', px: 14 * 50, py: 6 * 50, pw: 50, ph: 50, actions: ['Hello? This is green!'] },
+        { name: 'green', px: 14 * 50, py: 7 * 50, pw: 50, ph: 50, actions: ['Hello? This is green!'] },
+        { name: 'green', px: 15 * 50, py: 7 * 50, pw: 50, ph: 50, actions: ['Hello? This is green!'] },
+        { name: 'green', px: 16 * 50, py: 7 * 50, pw: 50, ph: 50, actions: ['Hello? This is green!'] },
+        { name: 'green', px: 17 * 50, py: 7 * 50, pw: 50, ph: 50, actions: ['Hello? This is green!'] },
+        { name: 'green', px: 18 * 50, py: 7 * 50, pw: 50, ph: 50, actions: ['Hello? This is green!'] },
+        { name: 'green', px: 23 * 50, py: 7 * 50, pw: 200, ph: 50, actions: ['Hello? This is green!'] },
+        { name: 'green', px: 40 * 50, py: 30 * 50, pw: 500, ph: 50, actions: ['Hello? This is green!'] },
       ])
     }
 
@@ -340,32 +345,37 @@ export default {
     const render = (context: CanvasRenderingContext2D, pw: number, ph: number) => {
       context.clearRect(0, 0, pw, ph)
 
+      context.save()
+      context.translate(area.opx, area.opy)
+
       // Render Map
       for (let mx = 0; mx < area.mw; mx++) {
         for (let my = 0; my < area.mh; my++) {
           context.fillStyle = ((mx + my) % 2) ? 'white' : 'lightgray'
-          context.fillRect(50 * mx + area.opx, 50 * my + area.opy, 50, 50)
+          context.fillRect(50 * mx, 50 * my, 50, 50)
         }
       }
 
       // Render Props
       area.props.forEach((prop) => {
         context.fillStyle = prop.name
-        context.fillRect(prop.px + area.opx, prop.py + area.opy, 50, 50)
+        context.fillRect(prop.pl, prop.pt, prop.pw, prop.ph)
       })
 
       // Render Chara
       context.fillStyle = 'black'
-      context.fillRect(chara.px + area.opx, chara.py + area.opy, 50, 50)
+      context.fillRect(chara.px, chara.py, 50, 50)
 
       area.dusts.forEach((dust) => {
         context.strokeStyle = 'gray'
         context.save()
-        context.translate(dust.px + area.opx + 25, dust.py + area.opy + 25)
+        context.translate(dust.px + 25, dust.py + 25)
         context.rotate(dust.r)
         context.strokeRect(-25, -25, 50, 50)
         context.restore()
       })
+
+      context.restore()
     }
 
     const animate = (context: CanvasRenderingContext2D, pw: number, ph: number) => {
