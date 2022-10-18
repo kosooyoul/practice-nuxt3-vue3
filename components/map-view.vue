@@ -4,19 +4,18 @@ class MapChara {
   static RIGHT = 2
   static UP = 4
   static DOWN = 8
+
   px = 0 // Pixel x
   py = 0 // Pixel y
   npx = 0 // New pixel x
   npy = 0 // New pixel y
-  mx = 0 // Map x
-  my = 0 // Map y
   acc = 0.4 // Acceleration increment x, y per tick
   ax = 0 // Acceleration x per tick
   ay = 0 // Acceleration y per tick
   max = 10 // Max acceleration x per tick
   may = 10 // Max acceleration y per tick
 
-  direction: number
+  radian = 0
 
   accelerateLeft() {
     this.ax = this.ax > 0 ? (this.ax * 0.8 - this.acc) : Math.max(this.ax - this.acc, -this.max)
@@ -36,10 +35,14 @@ class MapChara {
 
   deaccelerateAxisX() {
     this.ax *= 0.8
+    if (Math.abs(this.ax) < 0.001)
+      this.ax = 0
   }
 
   deaccelerateAxisY() {
     this.ay *= 0.8
+    if (Math.abs(this.ay) < 0.001)
+      this.ay = 0
   }
 
   reflectAxisX() {
@@ -121,39 +124,31 @@ class MapChara {
 
     this.px = this.npx
     this.py = this.npy
+
+    if (this.ay !== 0 || this.ax !== 0)
+      this.radian = Math.atan2(this.ay, this.ax)
   }
 
   act(area: MapArea) {
-    let direction = 0
-    if (this.ax < -2)
-      direction |= MapChara.LEFT
-    else if (this.ax > 2)
-      direction |= MapChara.RIGHT
-
-    if (this.ay < -2)
-      direction |= MapChara.UP
-    else if (this.ay > 2)
-      direction |= MapChara.DOWN
-
-    area.addDust(new MapDust(this.px, this.py, direction))
+    area.addDust(new MapDust(this.px, this.py, this.radian))
   }
 }
 
 class MapDust {
   px: number // Pixel x
   py: number // Pixel x
-  direction: number
+  radian: number
   a: number // Acceleration
   ma: number // Max acceleration
-  r: number // Rotation
+  rotation: number // Rotation
 
-  constructor(px: number, py: number, direction: number) {
+  constructor(px: number, py: number, radian: number) {
     this.px = px
     this.py = py
-    this.direction = direction
+    this.radian = radian
     this.a = 100
     this.ma = 40
-    this.r = Math.random() * 360
+    this.rotation = Math.random() * 360
   }
 }
 
@@ -252,19 +247,175 @@ class MapArea {
 
   computeDusts() {
     this.dusts.forEach((dust) => {
-      if (dust.direction & MapChara.LEFT)
-        dust.px -= Math.min(dust.a, dust.ma)
-      else if (dust.direction & MapChara.RIGHT)
-        dust.px += Math.min(dust.a, dust.ma)
-      if (dust.direction & MapChara.UP)
-        dust.py -= Math.min(dust.a, dust.ma)
-      else if (dust.direction & MapChara.DOWN)
-        dust.py += Math.min(dust.a, dust.ma)
+      const d = Math.min(dust.a, dust.ma)
+      dust.px += Math.cos(dust.radian) * d
+      dust.py += Math.sin(dust.radian) * d
 
-      dust.r += Math.min(dust.a, dust.ma)
+      dust.rotation += Math.min(dust.a, dust.ma)
 
       dust.a *= 0.8
     })
+  }
+}
+
+class MapKeyboardController {
+  private keys = {
+    left: false,
+    right: false,
+    up: false,
+    down: false,
+    action: false,
+  }
+
+  get left() { return this.keys.left }
+  get right() { return this.keys.right }
+  get up() { return this.keys.up }
+  get down() { return this.keys.down }
+  get action() { return this.keys.action }
+
+  setKeyEnabled(keyCode: string, flag: boolean): boolean {
+    if (keyCode === 'ArrowLeft')
+      this.setLeftKeyEnabled(flag)
+    else if (keyCode === 'ArrowRight')
+      this.setRightKeyEnabled(flag)
+    else if (keyCode === 'ArrowUp')
+      this.setUpKeyEnabled(flag)
+    else if (keyCode === 'ArrowDown')
+      this.setDownKeyEnabled(flag)
+    else if (keyCode === 'KeyZ')
+      this.setActionKeyEnabled(flag)
+    else
+      return false
+    return true
+  }
+
+  setLeftKeyEnabled(flag: boolean) {
+    this.keys.right &&= !flag
+    this.keys.left = flag
+  }
+
+  setRightKeyEnabled(flag: boolean) {
+    this.keys.left &&= !flag
+    this.keys.right = flag
+  }
+
+  setUpKeyEnabled(flag: boolean) {
+    this.keys.down &&= !flag
+    this.keys.up = flag
+  }
+
+  setDownKeyEnabled(flag: boolean) {
+    this.keys.up &&= !flag
+    this.keys.down = flag
+  }
+
+  setActionKeyEnabled(flag: boolean) {
+    this.keys.action = flag
+  }
+}
+
+class MapRenderer {
+  private actor: MapChara
+  private area: MapArea
+  private controller: MapKeyboardController
+
+  private status = {
+    isPlay: false,
+  }
+
+  setActor(actor: MapChara) { this.actor = actor }
+  setArea(area: MapArea) { this.area = area }
+  setController(controller: MapKeyboardController) { this.controller = controller }
+
+  play() { this.status.isPlay = true }
+  stop() { this.status.isPlay = false }
+
+  animate(canvas: HTMLCanvasElement): void {
+    if (this.status.isPlay)
+      return
+
+    this.status.isPlay = true
+
+    const context = canvas.getContext('2d')
+
+    const nextFrame = () => {
+      this.compute(canvas.width, canvas.height)
+      this.render(context, canvas.width, canvas.height)
+
+      if (this.status.isPlay)
+        requestAnimationFrame(() => nextFrame())
+    }
+
+    nextFrame()
+  }
+
+  private compute(width: number, height: number): void {
+    this.area.setCamera(width, height)
+
+    // Compute Chara Position by Keys
+    if (this.controller.left)
+      this.actor.accelerateLeft()
+    else if (this.controller.right)
+      this.actor.accelerateRight()
+    else
+      this.actor.deaccelerateAxisX()
+
+    if (this.controller.up)
+      this.actor.accelerateUp()
+    else if (this.controller.down)
+      this.actor.accelerateDown()
+    else
+      this.actor.deaccelerateAxisY()
+
+    this.actor.move(this.area)
+
+    this.area.updateCameraPosition(this.actor.px, this.actor.py)
+
+    if (this.controller.action)
+      this.actor.act(this.area)
+
+    this.area.computeDusts()
+  }
+
+  private render(context: CanvasRenderingContext2D, width: number, height: number): void {
+    context.clearRect(0, 0, width, height)
+
+    context.save()
+    context.translate(this.area.opx, this.area.opy)
+
+    // Render Map
+    for (let mx = 0; mx < this.area.mw; mx++) {
+      for (let my = 0; my < this.area.mh; my++) {
+        context.fillStyle = ((mx + my) % 2) ? 'white' : 'lightgray'
+        context.fillRect(50 * mx, 50 * my, 50, 50)
+      }
+    }
+
+    // Render Props
+    this.area.props.forEach((prop) => {
+      context.fillStyle = prop.name
+      context.fillRect(prop.pl, prop.pt, prop.pw, prop.ph)
+    })
+
+    // Render Chara
+    context.save()
+    context.fillStyle = 'black'
+    context.translate(this.actor.px + 25, this.actor.py + 25)
+    context.rotate(this.actor.radian * 180 / Math.PI)
+    context.fillRect(-25, -25, 50, 50)
+    context.fillRect(25, -5, 10, 10)
+    context.restore()
+
+    this.area.dusts.forEach((dust) => {
+      context.strokeStyle = 'gray'
+      context.save()
+      context.translate(dust.px + 25, dust.py + 25)
+      context.rotate(dust.rotation)
+      context.strokeRect(-25, -25, 50, 50)
+      context.restore()
+    })
+
+    context.restore()
   }
 }
 
@@ -285,163 +436,50 @@ export default {
 
     const chara = new MapChara()
     const area = new MapArea(100, 100)
+    const controller = new MapKeyboardController()
 
-    const keys = {
-      left: false,
-      right: false,
-      up: false,
-      down: false,
-      action: false,
-    }
+    const renderer = new MapRenderer()
+    renderer.setArea(area)
+    renderer.setActor(chara)
+    renderer.setController(controller)
 
-    let play = true
-
-    const init = (pw: number, ph: number) => {
-      area.setCamera(pw, ph)
-      area.addProps([
-        { name: 'red', px: 4 * 50, py: 4 * 50, pw: 50, ph: 50, actions: ['Hello? This is red!'] },
-        { name: 'yellow', px: 6 * 50, py: 8 * 50, pw: 50, ph: 50, actions: ['Hello? This is yellow!'] },
-        { name: 'cyan', px: 7 * 50, py: 2 * 50, pw: 50, ph: 50, actions: ['Hello? This is cyan!'] },
-        { name: 'brown', px: 10 * 50, py: 3 * 50, pw: 50, ph: 50, actions: ['Hello? This is brown!'] },
-        { name: 'green', px: 14 * 50, py: 4 * 50, pw: 50, ph: 50, actions: ['Hello? This is green!'] },
-        { name: 'green', px: 14 * 50, py: 5 * 50, pw: 50, ph: 50, actions: ['Hello? This is green!'] },
-        { name: 'green', px: 14 * 50, py: 6 * 50, pw: 50, ph: 50, actions: ['Hello? This is green!'] },
-        { name: 'green', px: 14 * 50, py: 7 * 50, pw: 50, ph: 50, actions: ['Hello? This is green!'] },
-        { name: 'green', px: 15 * 50, py: 7 * 50, pw: 50, ph: 50, actions: ['Hello? This is green!'] },
-        { name: 'green', px: 16 * 50, py: 7 * 50, pw: 50, ph: 50, actions: ['Hello? This is green!'] },
-        { name: 'green', px: 17 * 50, py: 7 * 50, pw: 50, ph: 50, actions: ['Hello? This is green!'] },
-        { name: 'green', px: 18 * 50, py: 7 * 50, pw: 50, ph: 50, actions: ['Hello? This is green!'] },
-        { name: 'green', px: 23 * 50, py: 7 * 50, pw: 200, ph: 50, actions: ['Hello? This is green!'] },
-        { name: 'green', px: 40 * 50, py: 30 * 50, pw: 500, ph: 50, actions: ['Hello? This is green!'] },
-      ])
-    }
-
-    const compute = () => {
-      // Compute Chara Position by Keys
-      if (keys.left)
-        chara.accelerateLeft()
-      else if (keys.right)
-        chara.accelerateRight()
-      else
-        chara.deaccelerateAxisX()
-
-      if (keys.up)
-        chara.accelerateUp()
-      else if (keys.down)
-        chara.accelerateDown()
-      else
-        chara.deaccelerateAxisY()
-
-      chara.move(area)
-
-      area.updateCameraPosition(chara.px, chara.py)
-
-      if (keys.action)
-        chara.act(area)
-
-      area.computeDusts()
-    }
-
-    const render = (context: CanvasRenderingContext2D, pw: number, ph: number) => {
-      context.clearRect(0, 0, pw, ph)
-
-      context.save()
-      context.translate(area.opx, area.opy)
-
-      // Render Map
-      for (let mx = 0; mx < area.mw; mx++) {
-        for (let my = 0; my < area.mh; my++) {
-          context.fillStyle = ((mx + my) % 2) ? 'white' : 'lightgray'
-          context.fillRect(50 * mx, 50 * my, 50, 50)
-        }
-      }
-
-      // Render Props
-      area.props.forEach((prop) => {
-        context.fillStyle = prop.name
-        context.fillRect(prop.pl, prop.pt, prop.pw, prop.ph)
-      })
-
-      // Render Chara
-      context.fillStyle = 'black'
-      context.fillRect(chara.px, chara.py, 50, 50)
-
-      area.dusts.forEach((dust) => {
-        context.strokeStyle = 'gray'
-        context.save()
-        context.translate(dust.px + 25, dust.py + 25)
-        context.rotate(dust.r)
-        context.strokeRect(-25, -25, 50, 50)
-        context.restore()
-      })
-
-      context.restore()
-    }
-
-    const animate = (context: CanvasRenderingContext2D, pw: number, ph: number) => {
-      compute()
-      render(context, pw, ph)
-
-      if (play)
-        requestAnimationFrame(() => animate(context, pw, ph))
-    }
+    area.addProps([
+      { name: 'red', px: 4 * 50, py: 4 * 50, pw: 50, ph: 50, actions: ['Hello? This is red!'] },
+      { name: 'yellow', px: 6 * 50, py: 8 * 50, pw: 50, ph: 50, actions: ['Hello? This is yellow!'] },
+      { name: 'cyan', px: 7 * 50, py: 2 * 50, pw: 50, ph: 50, actions: ['Hello? This is cyan!'] },
+      { name: 'cyan', px: 10 * 50, py: 20 * 50, pw: 500, ph: 500, actions: ['Hello? This is cyan!'] },
+      { name: 'brown', px: 10 * 50, py: 3 * 50, pw: 50, ph: 50, actions: ['Hello? This is brown!'] },
+      { name: 'green', px: 14 * 50, py: 4 * 50, pw: 50, ph: 50, actions: ['Hello? This is green!'] },
+      { name: 'green', px: 14 * 50, py: 5 * 50, pw: 50, ph: 50, actions: ['Hello? This is green!'] },
+      { name: 'green', px: 14 * 50, py: 6 * 50, pw: 50, ph: 50, actions: ['Hello? This is green!'] },
+      { name: 'green', px: 14 * 50, py: 7 * 50, pw: 50, ph: 50, actions: ['Hello? This is green!'] },
+      { name: 'green', px: 15 * 50, py: 7 * 50, pw: 50, ph: 50, actions: ['Hello? This is green!'] },
+      { name: 'green', px: 16 * 50, py: 7 * 50, pw: 50, ph: 50, actions: ['Hello? This is green!'] },
+      { name: 'green', px: 17 * 50, py: 7 * 50, pw: 50, ph: 50, actions: ['Hello? This is green!'] },
+      { name: 'green', px: 18 * 50, py: 7 * 50, pw: 50, ph: 50, actions: ['Hello? This is green!'] },
+      { name: 'green', px: 23 * 50, py: 7 * 50, pw: 200, ph: 50, actions: ['Hello? This is green!'] },
+      { name: 'green', px: 40 * 50, py: 30 * 50, pw: 500, ph: 50, actions: ['Hello? This is green!'] },
+    ])
 
     onMounted(() => {
-      const pw = canvas.value.width = props.width || canvas.value.clientWidth
-      const ph = canvas.value.height = props.height || canvas.value.clientHeight
+      canvas.value.width = props.width || canvas.value.clientWidth
+      canvas.value.height = props.height || canvas.value.clientHeight
 
-      init(pw, ph)
-
-      const context = canvas.value.getContext('2d')
-      animate(context, pw, ph)
+      renderer.animate(canvas.value)
     })
 
     onUnmounted(() => {
-      play = false
+      renderer.stop()
     })
 
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.code === 'ArrowUp') {
-        keys.down = false
-        keys.up = true
-      }
-      else if (e.code === 'ArrowDown') {
-        keys.up = false
-        keys.down = true
-      }
-      else if (e.code === 'ArrowLeft') {
-        keys.right = false
-        keys.left = true
-      }
-      else if (e.code === 'ArrowRight') {
-        keys.left = false
-        keys.right = true
-      }
-      else if (e.code === 'KeyZ') {
-        keys.action = true
-      }
-      else {
-        return
-      }
-
-      e.preventDefault()
+      if (controller.setKeyEnabled(e.code, true))
+        e.preventDefault()
     }
 
     const onKeyUp = (e: KeyboardEvent) => {
-      if (e.code === 'ArrowUp')
-        keys.up = false
-      else if (e.code === 'ArrowDown')
-        keys.down = false
-      else if (e.code === 'ArrowLeft')
-        keys.left = false
-      else if (e.code === 'ArrowRight')
-        keys.right = false
-      else if (e.code === 'KeyZ')
-        keys.action = false
-      else
-        return
-
-      e.preventDefault()
+      if (controller.setKeyEnabled(e.code, false))
+        e.preventDefault()
     }
 
     return {
