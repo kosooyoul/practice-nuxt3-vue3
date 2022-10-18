@@ -1,35 +1,27 @@
 <script lang="ts">
 class MapChara {
   name: string
-  centerPixelX: number
-  centerPixelY: number
-  pixelLeft: number
-  pixelRight: number
-  pixelTop: number
-  pixelBottom: number
-  pixelWidth: number
-  pixelHeight: number
+
+  centerX: number
+  centerY: number
+
+  // Boundary
+  left: number
+  right: number
+  top: number
+  bottom: number
+
+  // Size
+  width: number
+  height: number
 
   movingAcceleration = 0 // Acceleration per tick
   maxMovingAcceleration = 6 // Max acceleration per tick
+
   turningAcceleration = 0 // Acceleration turn per tick
   maxTurningAcceleration = 0.04 // Max acceleration turn per tick
 
-  radian = 0
-
-  static fromWithPositionAndSize(name: string, position: { x: number; y: number }, size: { width: number; height: number }): MapChara {
-    const chara = new MapChara()
-    chara.name = name
-    chara.centerPixelX = position.x
-    chara.centerPixelY = position.y
-    chara.pixelLeft = position.x - size.width * 0.5
-    chara.pixelRight = position.x + size.width * 0.5
-    chara.pixelTop = position.y - size.height * 0.5
-    chara.pixelBottom = position.y + size.height * 0.5
-    chara.pixelWidth = size.width
-    chara.pixelHeight = size.height
-    return chara
-  }
+  direction = 0
 
   accelerateFront() {
     if (this.movingAcceleration < 0)
@@ -71,138 +63,224 @@ class MapChara {
       this.turningAcceleration = 0
   }
 
-  move(area: MapArea) {
-    let newPixelLeft = this.pixelLeft + Math.cos(this.radian) * this.movingAcceleration
-    let newPixelTop = this.pixelTop + Math.sin(this.radian) * this.movingAcceleration
+  compute(ground: MapGround) {
+    let newLeft = this.left + Math.cos(this.direction) * this.movingAcceleration
+    let newTop = this.top + Math.sin(this.direction) * this.movingAcceleration
 
-    // Check Map Boundary
-    if (newPixelLeft < 0)
-      newPixelLeft = 0
-    else if (newPixelLeft + this.pixelWidth > area.pw)
-      newPixelLeft = area.pw - this.pixelWidth
+    // Check Ground Boundary
+    if (newLeft < 0)
+      newLeft = 0
+    else if (newLeft + this.width > ground.width)
+      newLeft = ground.width - this.width
 
-    if (newPixelTop < 0)
-      newPixelTop = 0
-    else if (newPixelTop + this.pixelHeight > area.ph)
-      newPixelTop = area.ph - this.pixelHeight
+    if (newTop < 0)
+      newTop = 0
+    else if (newTop + this.height > ground.height)
+      newTop = ground.height - this.height
 
     // Check Props Boundary
-    area.props.forEach((prop) => {
-      const isInAxisX = Math.round(newPixelLeft) + this.pixelWidth > prop.pixelLeft && Math.round(newPixelLeft) < prop.pixelRight
-      const isInAxisY = Math.round(newPixelTop) + this.pixelHeight > prop.pixelTop && Math.round(newPixelTop) < prop.pixelBottom
+    ground.props.forEach((prop) => {
+      const isInAxisX = Math.round(newLeft) + this.width > prop.left && Math.round(newLeft) < prop.right
+      const isInAxisY = Math.round(newTop) + this.height > prop.top && Math.round(newTop) < prop.bottom
 
-      const isCrossedFromLeft = this.pixelLeft + this.pixelWidth <= prop.pixelLeft && newPixelLeft + this.pixelWidth > prop.pixelLeft
-      const isCrossedFromRight = this.pixelLeft >= prop.pixelRight && newPixelLeft < prop.pixelRight
-      const isCrossedFromTop = this.pixelTop + this.pixelHeight <= prop.pixelTop && newPixelTop + this.pixelHeight > prop.pixelTop
-      const isCrossedFromBottom = this.pixelTop >= prop.pixelBottom && newPixelTop < prop.pixelBottom
+      const isCrossedFromLeft = this.left + this.width <= prop.left && newLeft + this.width > prop.left
+      const isCrossedFromRight = this.left >= prop.right && newLeft < prop.right
+      const isCrossedFromTop = this.top + this.height <= prop.top && newTop + this.height > prop.top
+      const isCrossedFromBottom = this.top >= prop.bottom && newTop < prop.bottom
 
       if (isInAxisX && isCrossedFromTop) {
-        newPixelTop = prop.pixelTop - this.pixelHeight
+        newTop = prop.top - this.height
       }
       else if (isInAxisX && isCrossedFromBottom) {
-        newPixelTop = prop.pixelBottom
+        newTop = prop.bottom
       }
       else if (isInAxisY && isCrossedFromLeft) {
-        newPixelLeft = prop.pixelLeft - this.pixelWidth
+        newLeft = prop.left - this.width
       }
       else if (isInAxisY && isCrossedFromRight) {
-        newPixelLeft = prop.pixelRight
+        newLeft = prop.right
       }
       else if (isInAxisX && isInAxisY) {
-        if (newPixelLeft < prop.pixelLeft)
-          newPixelLeft = prop.pixelLeft - this.pixelWidth
+        if (newLeft < prop.left)
+          newLeft = prop.left - this.width
         else
-          newPixelLeft = prop.pixelRight
+          newLeft = prop.right
 
-        if (newPixelTop < prop.pixelTop)
-          newPixelTop = prop.pixelTop - this.pixelHeight
+        if (newTop < prop.top)
+          newTop = prop.top - this.height
         else
-          newPixelTop = prop.pixelBottom
+          newTop = prop.bottom
       }
     })
 
-    this.pixelLeft = newPixelLeft
-    this.pixelTop = newPixelTop
-    this.pixelRight = this.pixelLeft + this.pixelWidth
-    this.pixelBottom = this.pixelTop + this.pixelHeight
-    this.centerPixelX = (this.pixelLeft + this.pixelRight) * 0.5
-    this.centerPixelY = (this.pixelTop + this.pixelBottom) * 0.5
+    this.left = newLeft
+    this.top = newTop
+    this.right = this.left + this.width
+    this.bottom = this.top + this.height
+    this.centerX = (this.left + this.right) * 0.5
+    this.centerY = (this.top + this.bottom) * 0.5
 
-    this.radian += this.turningAcceleration
-  }
-
-  act(area: MapArea) {
-    area.addDust(new MapDust(this.centerPixelX + 25, this.centerPixelY + 25, this.radian))
+    this.direction += this.turningAcceleration
   }
 
   render(context: CanvasRenderingContext2D) {
     context.fillStyle = 'black'
-    context.translate(this.centerPixelX, this.centerPixelY)
-    context.rotate(this.radian)
-    context.fillRect(-this.pixelWidth * 0.5, -this.pixelHeight * 0.5, this.pixelWidth, this.pixelHeight)
+    context.translate(this.centerX, this.centerY)
+    context.rotate(this.direction)
+    context.fillRect(-this.width * 0.5, -this.height * 0.5, this.width, this.height)
     context.fillRect(30, -15, 10, 30)
+  }
+
+  static createWithPositionAndSize(name: string, position: { x: number; y: number }, size: { width: number; height: number }): MapChara {
+    const chara = new MapChara()
+    chara.name = name
+    chara.centerX = position.x
+    chara.centerY = position.y
+    chara.left = position.x - size.width * 0.5
+    chara.right = position.x + size.width * 0.5
+    chara.top = position.y - size.height * 0.5
+    chara.bottom = position.y + size.height * 0.5
+    chara.width = size.width
+    chara.height = size.height
+    return chara
   }
 }
 
 class MapDust {
-  px: number // Pixel x
-  py: number // Pixel x
-  pl: number // Pixel left
-  pr: number // Pixel right
-  pt: number // Pixel top
-  pb: number // Pixel bottom
-  pw: number // Pixel width
-  ph: number // Pixel height
-  radian: number
-  a: number // Acceleration
-  ma: number // Max acceleration
-  rotation: number // Rotation
+  centerX: number
+  centerY: number
 
-  constructor(px: number, py: number, radian: number) {
-    const size = 20
-    this.px = px
-    this.py = py
-    this.pl = px - size * 0.5
-    this.pr = px + size * 0.5
-    this.pt = py - size * 0.5
-    this.pb = py + size * 0.5
-    this.pw = size
-    this.ph = size
-    this.radian = radian
-    this.a = 100
-    this.ma = 40
-    this.rotation = Math.random() * 360
+  // Boundary
+  left: number
+  right: number
+  top: number
+  bottom: number
+
+  // Size
+  width: number
+  height: number
+
+  // Direction
+  direction: number
+
+  movingAcceleration = 200
+  maxMovingAcceleration = 30
+
+  spin: number
+
+  static createWithPositionAndDirection(position: { x: number; y: number }, size: { width: number; height: number }, direction: number): MapDust {
+    const dust = new MapDust()
+    dust.centerX = position.x
+    dust.centerY = position.y
+    dust.left = position.x - size.width * 0.5
+    dust.right = position.x + size.width * 0.5
+    dust.top = position.y - size.height * 0.5
+    dust.bottom = position.y + size.height * 0.5
+    dust.width = size.width
+    dust.height = size.height
+    dust.direction = direction
+    dust.spin = Math.random() * Math.PI
+    return dust
+  }
+
+  compute(ground: MapGround) {
+    const acceleration = Math.min(this.movingAcceleration, this.maxMovingAcceleration)
+    let newCenterX = this.centerX + Math.cos(this.direction) * acceleration
+    let newCenterY = this.centerY + Math.sin(this.direction) * acceleration
+
+    ground.props.forEach((prop) => {
+      const isInAxisX = Math.round(newCenterX) > prop.left && Math.round(newCenterX) < prop.right
+      const isInAxisY = Math.round(newCenterY) > prop.top && Math.round(newCenterY) < prop.bottom
+
+      const isCrossedFromLeft = this.centerX <= prop.left && newCenterX > prop.left
+      const isCrossedFromRight = this.centerX >= prop.right && newCenterX < prop.right
+      const isCrossedFromTop = this.centerY <= prop.top && newCenterY > prop.top
+      const isCrossedFromBottom = this.centerY >= prop.bottom && newCenterY < prop.bottom
+
+      if (isInAxisX && isCrossedFromTop) {
+        newCenterY = prop.top
+        this.direction = -Math.PI * 0.5 - (this.direction - Math.PI * 0.5)
+        this.movingAcceleration *= 0.2
+      }
+      else if (isInAxisX && isCrossedFromBottom) {
+        newCenterY = prop.bottom
+        this.direction = -Math.PI * 0.5 - (this.direction - Math.PI * 0.5)
+        this.movingAcceleration *= 0.2
+      }
+      else if (isInAxisY && isCrossedFromLeft) {
+        newCenterX = prop.left
+        this.direction = -Math.PI - this.direction
+        this.movingAcceleration *= 0.2
+      }
+      else if (isInAxisY && isCrossedFromRight) {
+        newCenterX = prop.right
+        this.direction = -Math.PI - this.direction
+        this.movingAcceleration *= 0.2
+      }
+      else if (isInAxisX && isInAxisY) {
+        if (newCenterX < prop.left)
+          newCenterX = prop.left
+        else
+          newCenterX = prop.right
+
+        if (newCenterY < prop.top)
+          newCenterY = prop.top
+        else
+          newCenterY = prop.bottom
+      }
+    })
+
+    this.centerX = newCenterX
+    this.centerY = newCenterY
+    this.spin += Math.min(this.movingAcceleration, this.maxMovingAcceleration)
+
+    this.movingAcceleration *= 0.8
+  }
+
+  render(context: CanvasRenderingContext2D) {
+    context.strokeStyle = 'gray'
+    context.save()
+    context.translate(this.centerX, this.centerY)
+    context.rotate(this.spin)
+    context.strokeRect(-this.width * 0.5, -this.height * 0.5, this.width, this.height)
+    context.restore()
   }
 }
 
 class MapProp {
   name: string
-  centerPixelX: number
-  centerPixelY: number
-  pixelLeft: number
-  pixelRight: number
-  pixelTop: number
-  pixelBottom: number
-  pixelWidth: number
-  pixelHeight: number
+
+  centerX: number
+  centerY: number
+
+  // Boundary
+  left: number
+  right: number
+  top: number
+  bottom: number
+
+  // Size
+  width: number
+  height: number
+
   actions: any[]
 
   render(context: CanvasRenderingContext2D) {
     context.fillStyle = this.name
-    context.fillRect(this.pixelLeft, this.pixelTop, this.pixelWidth, this.pixelHeight)
+    context.fillRect(this.left, this.top, this.width, this.height)
   }
 
   static fromWithBoundary(name: string, boundary: { left: number; right: number; top: number; bottom: number }, actions: any[]): MapProp {
     const prop = new MapProp()
     prop.name = name
-    prop.centerPixelX = (boundary.left + boundary.right) * 0.5
-    prop.centerPixelY = (boundary.top + boundary.bottom) * 0.5
-    prop.pixelLeft = boundary.left
-    prop.pixelRight = boundary.right
-    prop.pixelTop = boundary.top
-    prop.pixelBottom = boundary.bottom
-    prop.pixelWidth = boundary.right - boundary.left
-    prop.pixelHeight = boundary.bottom - boundary.top
+    prop.centerX = (boundary.left + boundary.right) * 0.5
+    prop.centerY = (boundary.top + boundary.bottom) * 0.5
+    prop.left = boundary.left
+    prop.right = boundary.right
+    prop.top = boundary.top
+    prop.bottom = boundary.bottom
+    prop.width = boundary.right - boundary.left
+    prop.height = boundary.bottom - boundary.top
     prop.actions = actions
     return prop
   }
@@ -210,73 +288,74 @@ class MapProp {
   static fromWithPositionAndSize(name: string, position: { x: number; y: number }, size: { width: number; height: number }, actions: any[]): MapProp {
     const prop = new MapProp()
     prop.name = name
-    prop.centerPixelX = position.x
-    prop.centerPixelY = position.y
-    prop.pixelLeft = position.x - size.width * 0.5
-    prop.pixelRight = position.x + size.width * 0.5
-    prop.pixelTop = position.y - size.height * 0.5
-    prop.pixelBottom = position.y + size.height * 0.5
-    prop.pixelWidth = size.width
-    prop.pixelHeight = size.height
+    prop.centerX = position.x
+    prop.centerY = position.y
+    prop.left = position.x - size.width * 0.5
+    prop.right = position.x + size.width * 0.5
+    prop.top = position.y - size.height * 0.5
+    prop.bottom = position.y + size.height * 0.5
+    prop.width = size.width
+    prop.height = size.height
     prop.actions = actions
     return prop
   }
 }
 
-class MapArea {
-  static CHARA_SIZE = 50
-  static CELL_SIZE = 50
+class MapCamera {
+  boundaryLeft: number
+  boundaryRight: number
+  boundaryTop: number
+  boundaryBottom: number
 
-  mw: number // Map width, cell count of width, ex; 100
-  mh: number // Map height, cell count of height, ex; 100
+  offsetX = 0
+  offsetY = 0
+  targetOffsetX = 0
+  targetOffsetY = 0
 
-  opx = 0 // Camera offset pixel x, ex; 0
-  opy = 0 // Camera offset pixel y, ex; 0
-  topx = 0 // Target camera offset pixel x, ex; 0
-  topy = 0 // Target camera offset pixel y, ex; 0
+  offsetFollowingFactor = 0.2
 
-  bpl = 0 // Camera boundary pixel left, ex; -100
-  bpr = 0 // Camera boundary pixel right, ex; 100
-  bpt = 0 // Camera boundary pixel top, ex; -100
-  bpb = 0 // Camera boundary pixel bottom, ex; 100
+  setViewportSize(width: number, height: number) {
+    this.boundaryLeft = width * 0.4
+    this.boundaryRight = width * 0.6
+    this.boundaryTop = height * 0.4
+    this.boundaryBottom = height * 0.6
+  }
 
-  pw: number // Map pixel width, ex; 100 * 5
-  ph: number // Map pixel height, ex; 100 * 5
+  moveTo(x: number, y: number) {
+    if (x + this.targetOffsetX > this.boundaryRight)
+      this.targetOffsetX += this.boundaryRight - x - this.targetOffsetX
+    else if (x + this.targetOffsetX < this.boundaryLeft)
+      this.targetOffsetX += this.boundaryLeft - x - this.targetOffsetX
+
+    if (y + this.targetOffsetY > this.boundaryBottom)
+      this.targetOffsetY += this.boundaryBottom - y - this.targetOffsetY
+    else if (y + this.targetOffsetY < this.boundaryTop)
+      this.targetOffsetY += this.boundaryTop - y - this.targetOffsetY
+
+    this.offsetX += (this.targetOffsetX - this.offsetX) * this.offsetFollowingFactor
+    this.offsetY += (this.targetOffsetY - this.offsetY) * this.offsetFollowingFactor
+  }
+}
+
+class MapGround {
+  countOfColTiles: number // Map width, cell count of width, ex; 100
+  countOfRowTiles: number // Map height, cell count of height, ex; 100
+  tileSize: number
+
+  width: number // Map pixel width, ex; 100 * 5
+  height: number // Map pixel height, ex; 100 * 5
 
   props: MapProp[]
 
-  dusts: MapDust[] = []
+  constructor(countOfColTiles: number, countOfRowTiles: number, tileSize: number) {
+    this.countOfColTiles = countOfColTiles
+    this.countOfRowTiles = countOfRowTiles
+    this.tileSize = tileSize
 
-  constructor(mw: number, mh: number) {
-    this.mw = mw
-    this.mh = mh
-
-    this.pw = mw * MapArea.CELL_SIZE
-    this.ph = mh * MapArea.CELL_SIZE
+    this.width = countOfColTiles * tileSize
+    this.height = countOfRowTiles * tileSize
 
     this.props = []
-  }
-
-  setCamera(px: number, ph: number) {
-    this.bpl = px * 0.5 - 80
-    this.bpr = px * 0.5 + 80
-    this.bpt = ph * 0.5 - 60
-    this.bpb = ph * 0.5 + 60
-  }
-
-  updateCameraPosition(px: number, py: number) {
-    if (px + this.topx + MapArea.CELL_SIZE > this.bpr)
-      this.topx += this.bpr - px - this.topx - MapArea.CELL_SIZE
-    else if (px + this.topx < this.bpl)
-      this.topx += this.bpl - px - this.topx
-
-    if (py + this.topy + MapArea.CELL_SIZE > this.bpb)
-      this.topy += this.bpb - py - this.topy - MapArea.CELL_SIZE
-    else if (py + this.topy < this.bpt)
-      this.topy += this.bpt - py - this.topy
-
-    this.opx += (this.topx - this.opx) * 0.2
-    this.opy += (this.topy - this.opy) * 0.2
   }
 
   addProps(props: { name: string; px: number; py: number; pw: number; ph: number; actions: any[] }[]) {
@@ -288,22 +367,6 @@ class MapArea {
   findProp() {
     // TODO
     return this.props[0]
-  }
-
-  addDust(dust: MapDust) {
-    this.dusts.push(dust)
-  }
-
-  computeDusts() {
-    this.dusts.forEach((dust) => {
-      const d = Math.min(dust.a, dust.ma)
-      dust.px += Math.cos(dust.radian) * d
-      dust.py += Math.sin(dust.radian) * d
-
-      dust.rotation += Math.min(dust.a, dust.ma)
-
-      dust.a *= 0.8
-    })
   }
 }
 
@@ -365,7 +428,9 @@ class MapKeyboardController {
 
 class MapRenderer {
   private actor: MapChara
-  private area: MapArea
+  private ground: MapGround
+  private camera: MapCamera
+  private dusts: MapDust[] = []
   private controller: MapKeyboardController
 
   private status = {
@@ -373,7 +438,8 @@ class MapRenderer {
   }
 
   setActor(actor: MapChara) { this.actor = actor }
-  setArea(area: MapArea) { this.area = area }
+  setGround(ground: MapGround) { this.ground = ground }
+  setCamera(camera: MapCamera) { this.camera = camera }
   setController(controller: MapKeyboardController) { this.controller = controller }
 
   play() { this.status.isPlay = true }
@@ -399,7 +465,7 @@ class MapRenderer {
   }
 
   private compute(width: number, height: number): void {
-    this.area.setCamera(width, height)
+    this.camera.setViewportSize(width, height)
 
     // Compute Chara Position by Keys
     if (this.controller.left)
@@ -416,46 +482,44 @@ class MapRenderer {
     else
       this.actor.deaccelerateMoving()
 
-    this.actor.move(this.area)
+    this.actor.compute(this.ground)
 
-    this.area.updateCameraPosition(this.actor.centerPixelX, this.actor.centerPixelY)
+    this.camera.moveTo(this.actor.centerX, this.actor.centerY)
 
     if (this.controller.action)
-      this.actor.act(this.area)
+      this.dusts.push(MapDust.createWithPositionAndDirection({ x: this.actor.centerX, y: this.actor.centerY }, { width: 10, height: 10 }, this.actor.direction))
 
-    this.area.computeDusts()
+    this.dusts.forEach(dust => dust.compute(this.ground))
+
+    for (let i = this.dusts.length - 1; i >= 0; i--) {
+      if (Math.abs(this.dusts[i].movingAcceleration) < 0.1)
+        this.dusts.splice(i, 1)
+    }
   }
 
   private render(context: CanvasRenderingContext2D, width: number, height: number): void {
     context.clearRect(0, 0, width, height)
 
     context.save()
-    context.translate(this.area.opx, this.area.opy)
+    context.translate(this.camera.offsetX, this.camera.offsetY)
 
     // Render Map
-    for (let mx = 0; mx < this.area.mw; mx++) {
-      for (let my = 0; my < this.area.mh; my++) {
-        context.fillStyle = ((mx + my) % 2) ? 'white' : 'lightgray'
-        context.fillRect(50 * mx, 50 * my, 50, 50)
+    for (let col = 0; col < this.ground.countOfColTiles; col++) {
+      for (let row = 0; row < this.ground.countOfRowTiles; row++) {
+        context.fillStyle = ((col + row) % 2) ? 'white' : 'lightgray'
+        context.fillRect(col * this.ground.tileSize, row * this.ground.tileSize, this.ground.tileSize, this.ground.tileSize)
       }
     }
 
     // Render Props
-    this.area.props.forEach(prop => prop.render(context))
+    this.ground.props.forEach(prop => prop.render(context))
 
     // Render Chara
     context.save()
     this.actor.render(context)
     context.restore()
 
-    this.area.dusts.forEach((dust) => {
-      context.strokeStyle = 'gray'
-      context.save()
-      context.translate(dust.px, dust.py)
-      context.rotate(dust.rotation / 180 * Math.PI)
-      context.strokeRect(-dust.pw * 0.5, -dust.ph * 0.5, dust.pw, dust.ph)
-      context.restore()
-    })
+    this.dusts.forEach(dust => dust.render(context))
 
     context.restore()
   }
@@ -476,17 +540,19 @@ export default {
   setup(props: any) {
     const canvas: { value: HTMLCanvasElement | null } = ref(null)
 
-    const chara = MapChara.fromWithPositionAndSize('test', { x: 0, y: 0 }, { width: 50, height: 50 })
-    const area = new MapArea(20, 20)
+    const chara = MapChara.createWithPositionAndSize('test', { x: 0, y: 0 }, { width: 50, height: 50 })
+    const ground = new MapGround(20, 20, 50)
+    const camera = new MapCamera()
     const controller = new MapKeyboardController()
 
     const renderer = new MapRenderer()
-    renderer.setArea(area)
     renderer.setActor(chara)
+    renderer.setGround(ground)
+    renderer.setCamera(camera)
     renderer.setController(controller)
 
-    area.addProps([
-      { name: 'red', px: 4 * 50, py: 4 * 50, pw: 50, ph: 50, actions: ['Hello? This is red!'] },
+    ground.addProps([
+      { name: 'red', px: 3 * 50, py: 3 * 50, pw: 140, ph: 140, actions: ['Hello? This is red!'] },
       { name: 'red', px: 220, py: 10 * 50, pw: 10, ph: 240, actions: ['Hello? This is red!'] },
       { name: 'yellow', px: 6 * 50, py: 8 * 50, pw: 50, ph: 50, actions: ['Hello? This is yellow!'] },
       { name: 'cyan', px: 7 * 50, py: 2 * 50, pw: 50, ph: 50, actions: ['Hello? This is cyan!'] },
