@@ -107,6 +107,27 @@ export default {
       rightAnimation.play()
     }
 
+    const onLocationClick = (index: number) => {
+      if (repAnimation != null) {
+        clearTimeout(timer)
+        timer = setTimeout(() => onLocationClick(index))
+        return
+      }
+
+      const leftAnimation = new Animation(toLeftEffect, document.timeline)
+      const rightAnimation = new Animation(fromRightEffect, document.timeline)
+
+      repAnimation = leftAnimation
+      repAnimation.onfinish = () => repAnimation = null
+
+      selectedIndex.value = index % props.images.length
+      leftIndex.value = rightIndex.value
+      rightIndex.value = selectedIndex.value
+
+      leftAnimation.play()
+      rightAnimation.play()
+    }
+
     return {
       selectedIndex,
       leftIndex,
@@ -115,6 +136,7 @@ export default {
       rightElement,
       onLeftClick,
       onRightClick,
+      onLocationClick,
     }
   },
 }
@@ -137,7 +159,7 @@ export default {
         Left
       </button>
       <nav style="position: absolute; width: 100%; bottom: 0px; margin-bottom: 10px; text-align: center;">
-        <button v-for="(_, i) of images" :key="i" :class="{ selected: selectedIndex === i }" />
+        <button v-for="(_, i) of images" :key="i" :class="{ selected: selectedIndex === i }" @click="onLocationClick(i)" />
       </nav>
       <button style="position: absolute; right: 0px; top: 50%; width: 48px; height: 48px; margin-right: 10px; margin-top: -24px;" @click="onRightClick">
         Right
