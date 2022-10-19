@@ -22,8 +22,19 @@ export default {
     const onLeftClick = () => {
       selectIndex(selectedIndex.value - 1)
     }
+
     const onRightClick = () => {
       selectIndex(selectedIndex.value + 1)
+    }
+
+    const onLocationClick = (index: number) => {
+      const newSelectedIndex = (index + props.images.length) % props.images.length
+      if (selectedIndex.value === newSelectedIndex)
+        return
+
+      leftIndex.value = selectedIndex.value
+      selectedIndex.value = newSelectedIndex
+      rightIndex.value = (index + 1 + props.images.length) % props.images.length
     }
 
     selectIndex(0)
@@ -34,6 +45,7 @@ export default {
       rightIndex,
       onLeftClick,
       onRightClick,
+      onLocationClick,
     }
   },
 }
@@ -42,7 +54,7 @@ export default {
 <template>
   <div class="slide">
     <ul>
-      <li v-for="(image, i) in images" :key="i" :class="{ left: leftIndex === i, right: rightIndex === i, center: selectedIndex === i }">
+      <li v-for="(image, i) in images" :key="i" :class="{ left: selectedIndex < i, right: selectedIndex > i, center: selectedIndex === i }">
         <img class="image" :src="`${image}`">
         <img class="mirror" :src="`${image}`">
       </li>
@@ -52,7 +64,7 @@ export default {
         Left
       </button>
       <nav style="position: absolute; width: 100%; bottom: 0px; margin-bottom: 10px; text-align: center;">
-        <button v-for="(_, i) of images" :key="i" :class="{ selected: selectedIndex === i }" />
+        <button v-for="(_, i) of images" :key="i" :class="{ selected: selectedIndex === i }" @click="onLocationClick(i)" />
       </nav>
       <button style="position: absolute; right: 0px; top: 50%; width: 48px; height: 48px; margin-right: 10px; margin-top: -24px;" @click="onRightClick">
         Right
@@ -96,21 +108,17 @@ div.slide>ul>li {
   transition-duration: 0.4s;
   transition-timing-function: ease-out;
   opacity: 0;
-  visibility: hidden;
 }
 div.slide>ul>li.center {
   opacity: 1;
-  visibility: visible;
 }
 div.slide>ul>li.left {
   transform: rotate3d(0, 1, 0, -40deg) translate3d(-400px, 0px, 40px);
   -webkit-transform: rotate3d(0, 1, 0, -40deg) translate3d(-400px, 0px, 40px);
-  visibility: visible;
 }
 div.slide>ul>li.right {
   transform: rotate3d(0, 1, 0, 40deg) translate3d(400px, 0px, 40px);
   -webkit-transform: rotate3d(0, 1, 0, 40deg) translate3d(400px, 0px, 40px);
-  visibility: visible;
 }
 div.slide>ul>li>img.image {
   display: block;

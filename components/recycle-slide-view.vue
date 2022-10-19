@@ -108,6 +108,10 @@ export default {
     }
 
     const onLocationClick = (index: number) => {
+      const newSelectedIndex = index % props.images.length
+      if (selectedIndex.value === newSelectedIndex)
+        return
+
       if (repAnimation != null) {
         clearTimeout(timer)
         timer = setTimeout(() => onLocationClick(index))
