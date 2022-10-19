@@ -64,8 +64,38 @@ export default {
       <MyThreejsSampleView />
     </section>
     <section>
-      <h2>6. SlideView</h2>
-      <SlideView class="slide-view" />
+      <h2>7. RecycleSlideView</h2>
+      <RecycleSlideView
+        class="slide-view" :images="[
+          '/pictures/sample_01.jpg',
+          '/pictures/sample_02.jpg',
+          '/pictures/sample_03.jpg',
+          '/pictures/sample_04.jpg',
+          '/pictures/sample_05.jpg',
+          '/pictures/sample_06.jpg',
+          '/pictures/sample_07.jpg',
+          '/pictures/sample_08.jpg',
+          '/pictures/sample_09.jpg',
+          '/pictures/sample_10.jpg',
+        ]"
+      />
+    </section>
+    <section>
+      <h2>6. ListSlideView</h2>
+      <ListSlideView
+        class="slide-view" :images="[
+          '/pictures/sample_01.jpg',
+          '/pictures/sample_02.jpg',
+          '/pictures/sample_03.jpg',
+          '/pictures/sample_04.jpg',
+          '/pictures/sample_05.jpg',
+          '/pictures/sample_06.jpg',
+          '/pictures/sample_07.jpg',
+          '/pictures/sample_08.jpg',
+          '/pictures/sample_09.jpg',
+          '/pictures/sample_10.jpg',
+        ]"
+      />
     </section>
     <section>
       <h2>5. MapView</h2>
