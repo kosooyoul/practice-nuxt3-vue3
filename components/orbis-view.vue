@@ -74,6 +74,7 @@ export default {
       controls.rotateSpeed = -1
       controls.minDistance = 0
       controls.maxDistance = 90
+      controls.enablePan = false
 
       camera.position.set(0, 0, 50)
       controls.update()
