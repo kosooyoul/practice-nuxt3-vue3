@@ -118,15 +118,31 @@ export default {
         return
       }
 
-      const leftAnimation = new Animation(toLeftEffect, document.timeline)
-      const rightAnimation = new Animation(fromRightEffect, document.timeline)
+      let leftAnimation = null
+      let rightAnimation = null
 
-      repAnimation = leftAnimation
-      repAnimation.onfinish = () => repAnimation = null
+      if (selectedIndex.value < newSelectedIndex) {
+        leftAnimation = new Animation(toLeftEffect, document.timeline)
+        rightAnimation = new Animation(fromRightEffect, document.timeline)
 
-      selectedIndex.value = index % props.images.length
-      leftIndex.value = rightIndex.value
-      rightIndex.value = selectedIndex.value
+        repAnimation = leftAnimation
+        repAnimation.onfinish = () => repAnimation = null
+
+        leftIndex.value = selectedIndex.value
+        rightIndex.value = newSelectedIndex
+        selectedIndex.value = newSelectedIndex
+      }
+      else {
+        leftAnimation = new Animation(fromLeftEffect, document.timeline)
+        rightAnimation = new Animation(toRightEffect, document.timeline)
+
+        repAnimation = leftAnimation
+        repAnimation.onfinish = () => repAnimation = null
+
+        rightIndex.value = selectedIndex.value
+        leftIndex.value = newSelectedIndex
+        selectedIndex.value = newSelectedIndex
+      }
 
       leftAnimation.play()
       rightAnimation.play()
