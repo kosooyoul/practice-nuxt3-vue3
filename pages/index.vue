@@ -56,7 +56,7 @@ export default {
 <template>
   <div>
     <header>
-      <h1>Nux3+Vue3 Components</h1>
+      <h1>Nuxt3+Vue3 Components</h1>
     </header>
     <section>
       <h2>Working...</h2>
