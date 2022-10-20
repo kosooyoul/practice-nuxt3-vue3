@@ -112,12 +112,12 @@ div.slide>ul>li.center {
   opacity: 1;
 }
 div.slide>ul>li.left {
-  transform: rotate3d(0, 1, 0, -40deg) translate3d(-400px, 0px, 40px);
-  -webkit-transform: rotate3d(0, 1, 0, -40deg) translate3d(-400px, 0px, 40px);
-}
-div.slide>ul>li.right {
   transform: rotate3d(0, 1, 0, 40deg) translate3d(400px, 0px, 40px);
   -webkit-transform: rotate3d(0, 1, 0, 40deg) translate3d(400px, 0px, 40px);
+}
+div.slide>ul>li.right {
+  transform: rotate3d(0, 1, 0, -40deg) translate3d(-400px, 0px, 40px);
+  -webkit-transform: rotate3d(0, 1, 0, -40deg) translate3d(-400px, 0px, 40px);
 }
 div.slide>ul>li>img.image {
   display: block;
