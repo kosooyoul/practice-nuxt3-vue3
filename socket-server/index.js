@@ -96,7 +96,7 @@ setInterval(() => {
 }, 100)
 
 // For WebSocket
-server.listen(50000, () => {
+server.listen(60000, () => {
   // eslint-disable-next-line no-console
-  console.log(new Date(), `WebSocket Server Listen ${50000}`)
+  console.log(new Date(), 'WebSocket Server Listen 60000')
 })
