@@ -433,6 +433,8 @@ class MapRenderer {
   private dusts: MapDust[] = []
   private controller: MapKeyboardController
 
+  private friends = {}
+
   private status = {
     isPlay: false,
   }
@@ -442,10 +444,39 @@ class MapRenderer {
   setCamera(camera: MapCamera) { this.camera = camera }
   setController(controller: MapKeyboardController) { this.controller = controller }
 
+  updateFriends(friends: any[]) {
+    Object.keys(this.friends).forEach((key: string) => {
+      const cid = Number(key)
+      if (friends.find(friend => friend.cid === cid) == null)
+        delete this.friends[cid]
+    })
+
+    friends.filter(friend => friend.data).forEach((friend: any) => {
+      const cid = friend.cid
+      const data = friend.data
+
+      if (this.friends[cid] == null) {
+        this.friends[cid] = {
+          x: data.x,
+          y: data.y,
+          direction: data.d,
+          targetX: data.x,
+          targetY: data.y,
+          targetDirection: data.d,
+        }
+      }
+      else {
+        this.friends[cid].targetX = data.x
+        this.friends[cid].targetY = data.y
+        this.friends[cid].targetDirection = data.d
+      }
+    })
+  }
+
   play() { this.status.isPlay = true }
   stop() { this.status.isPlay = false }
 
-  animate(canvas: HTMLCanvasElement): void {
+  animate(canvas: HTMLCanvasElement, eventListener?: (data: any) => void): void {
     if (this.status.isPlay)
       return
 
@@ -455,6 +486,15 @@ class MapRenderer {
 
     const nextFrame = () => {
       this.compute(canvas.width, canvas.height)
+
+      if (eventListener) {
+        setTimeout(() => eventListener({
+          x: Math.round(this.actor.centerX),
+          y: Math.round(this.actor.centerY),
+          d: Math.round(this.actor.direction * 1000) / 1000,
+        }))
+      }
+
       this.render(context, canvas.width, canvas.height)
 
       if (this.status.isPlay)
@@ -483,6 +523,13 @@ class MapRenderer {
       this.actor.deaccelerateMoving()
 
     this.actor.compute(this.ground)
+
+    for (const cid in this.friends) {
+      const friend = this.friends[cid]
+      friend.x += (friend.targetX - friend.x) * 0.2
+      friend.y += (friend.targetY - friend.y) * 0.2
+      friend.direction += (friend.targetDirection - friend.direction) * 0.2
+    }
 
     this.camera.moveTo(this.actor.centerX, this.actor.centerY)
 
@@ -519,6 +566,17 @@ class MapRenderer {
     this.actor.render(context)
     context.restore()
 
+    for (const cid in this.friends) {
+      const friend = this.friends[cid]
+      context.save()
+      context.fillStyle = 'black'
+      context.translate(friend.x, friend.y)
+      context.rotate(friend.direction)
+      context.fillRect(-50 * 0.5, -50 * 0.5, 50, 50)
+      context.fillRect(30, -15, 10, 30)
+      context.restore()
+    }
+
     this.dusts.forEach(dust => dust.render(context))
 
     context.restore()
@@ -537,7 +595,8 @@ export default {
       required: false,
     },
   },
-  setup(props: any) {
+  emits: ['event'],
+  setup(props: any, { emit }) {
     const canvas: { value: HTMLCanvasElement | null } = ref(null)
 
     const chara = MapChara.createWithPositionAndSize('test', { x: 0, y: 0 }, { width: 50, height: 50 })
@@ -574,7 +633,7 @@ export default {
       canvas.value.width = props.width || canvas.value.clientWidth
       canvas.value.height = props.height || canvas.value.clientHeight
 
-      renderer.animate(canvas.value)
+      renderer.animate(canvas.value, data => emit('event', data))
     })
 
     onUnmounted(() => {
@@ -591,10 +650,15 @@ export default {
         e.preventDefault()
     }
 
+    const updateFriends = (friends: { cid: number; data: any }[]): void => {
+      renderer.updateFriends(friends)
+    }
+
     return {
       canvas,
       onKeyDown,
       onKeyUp,
+      updateFriends,
     }
   },
 }
