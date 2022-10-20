@@ -56,7 +56,6 @@ export default {
     <ul>
       <li v-for="(image, i) in images" :key="i" :class="{ left: selectedIndex < i, right: selectedIndex > i, center: selectedIndex === i }">
         <img class="image" :src="`${image}`">
-        <img class="mirror" :src="`${image}`">
       </li>
     </ul>
     <div class="controller" style="position: absolute; left: 0px; top: 0px; width: 100%; height: 100%;">
@@ -126,20 +125,7 @@ div.slide>ul>li>img.image {
   height: 200px;
   border-radius: 4px;
   background-color: white;
-}
-div.slide>ul>li>img.mirror {
-  position: absolute;
-  width: 300px;
-  height: 200px;
-  margin-top: 4px;
-  border-radius: 4px;
-  transform-origin: bottom;
-  transform: rotateX(180deg);
-  background-color: white;
-  background-size: cover;
-  -webkit-mask-image: -webkit-gradient(linear, left bottom, left top, from(rgba(0,0,0,0.2)), to(rgba(0,0,0,0)));
-  mask-image: linear-gradient(to top, rgba(0,0,0,0.2), rgba(0,0,0,0));
-  filter: blur(2px);
+  -webkit-box-reflect: below 4px linear-gradient(to bottom, rgba(0,0,0,0.0), rgba(0,0,0,0.2));
 }
 div.slide nav>button {
   background-color: transparent;
