@@ -99,7 +99,8 @@ export default {
     </section>
     <section>
       <h2>5. MapView</h2>
-      <MapView class="map-view" :width="600" :height="400" />
+      <!-- <MapView class="map-view" :width="600" :height="400" /> -->
+      <a href="/map-view-demo">See MapView Demo</a>
     </section>
     <section>
       <h2>4. OrbisView</h2>
