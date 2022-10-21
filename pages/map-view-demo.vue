@@ -74,7 +74,7 @@ export default {
       this.connection.onerror = onerror
     }
 
-    this.connection = new WebSocket('ws://localhost:50000')
+    this.connection = new WebSocket('wss://components.auoi.net/ws')
     this.connection.onopen = onopen
   },
   methods: {
