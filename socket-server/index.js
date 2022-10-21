@@ -51,9 +51,20 @@ wss.on('connection', (ws) => {
 
   ws.on('message', (json) => {
     try {
-      const data = JSON.parse(json)
-      client.data = data
-      client.dataUpdated = true
+      const payload = JSON.parse(json)
+      if (payload.type === 'position') {
+        client.position = payload.data
+        client.positionUpdated = true
+      }
+      else if (payload.type === 'dusts') {
+        client.dusts = payload.data
+        client.dustsUpdated = true
+      }
+      else if (payload.type === 'hit') {
+        const target = payload.data?.target
+        if (clientsById[target])
+          send(clientsById[target], { type: 'dead' })
+      }
     }
     catch (e) {
       // eslint-disable-next-line no-console
@@ -72,20 +83,20 @@ wss.on('connection', (ws) => {
   const message2 = { type: 'friends', friends: [] }
   for (const id in clientsById) {
     const client = clientsById[id]
-    message2.friends.push({ cid: client.id, data: client.data })
+    message2.friends.push({ cid: client.id, data: client.position })
   }
 
   broadcast(message2)
 })
 
-setInterval(() => {
+const broadcastFriends = () => {
   const message = { type: 'friends', friends: [] }
 
   for (const id in clientsById) {
     const client = clientsById[id]
-    if (client.dataUpdated) {
-      message.friends.push({ cid: client.id, data: client.data })
-      client.dataUpdated = false
+    if (client.positionUpdated) {
+      message.friends.push({ cid: client.id, data: client.position })
+      client.positionUpdated = false
     }
     else {
       message.friends.push({ cid: client.id })
@@ -93,6 +104,28 @@ setInterval(() => {
   }
 
   broadcast(message)
+}
+
+const broadcastDusts = () => {
+  const message = { type: 'dusts', dusts: [] }
+
+  for (const id in clientsById) {
+    const client = clientsById[id]
+    if (client.dusts && client.dustsUpdated) {
+      message.dusts.push({ cid: client.id, data: client.dusts })
+      client.dustsUpdated = false
+    }
+  }
+
+  if (message.dusts.length === 0)
+    return
+
+  broadcast(message)
+}
+
+setInterval(() => {
+  broadcastFriends()
+  broadcastDusts()
 }, 100)
 
 // For WebSocket
