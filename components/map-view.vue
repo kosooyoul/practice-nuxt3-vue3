@@ -147,6 +147,13 @@ class MapChara {
 }
 
 class MapDust {
+  static countOfCreated = 0
+
+  no: number
+
+  oldCenterX: number
+  oldCenterY: number
+
   centerX: number
   centerY: number
 
@@ -168,8 +175,14 @@ class MapDust {
 
   spin: number
 
-  static createWithPositionAndDirection(position: { x: number; y: number }, size: { width: number; height: number }, direction: number): MapDust {
+  constructor() {
+    this.no = MapDust.countOfCreated++
+  }
+
+  static createWithPositionAndDirection(position: { x: number; y: number }, size: { width: number; height: number }, direction: number, chargeRatio: number): MapDust {
     const dust = new MapDust()
+    dust.oldCenterX = position.x
+    dust.oldCenterY = position.y
     dust.centerX = position.x
     dust.centerY = position.y
     dust.left = position.x - size.width * 0.5
@@ -179,11 +192,12 @@ class MapDust {
     dust.width = size.width
     dust.height = size.height
     dust.direction = direction
+    dust.movingAcceleration *= chargeRatio
     dust.spin = Math.random() * Math.PI
     return dust
   }
 
-  compute(ground: MapGround) {
+  computeWithGround(ground: MapGround) {
     const acceleration = Math.min(this.movingAcceleration, this.maxMovingAcceleration)
     let newCenterX = this.centerX + Math.cos(this.direction) * acceleration
     let newCenterY = this.centerY + Math.sin(this.direction) * acceleration
@@ -230,11 +244,29 @@ class MapDust {
       }
     })
 
+    this.oldCenterX = this.centerX
+    this.oldCenterY = this.centerY
     this.centerX = newCenterX
     this.centerY = newCenterY
     this.spin += Math.min(this.movingAcceleration, this.maxMovingAcceleration)
 
     this.movingAcceleration *= 0.8
+  }
+
+  computeWithFriends(friends: any) {
+    const d = 50 * 50
+
+    for (const key in friends) {
+      const cid = Number(key)
+      const friend: { x: number; y: number; direction: number } = friends[cid]
+
+      const distance = (friend.x - this.oldCenterX) ** 2 + (friend.y - this.oldCenterY) ** 2
+      const newDistance = (friend.x - this.centerX) ** 2 + (friend.y - this.centerY) ** 2
+      if (distance > d && newDistance < d)
+        return cid
+    }
+
+    return null
   }
 
   render(context: CanvasRenderingContext2D) {
@@ -433,7 +465,12 @@ class MapRenderer {
   private dusts: MapDust[] = []
   private controller: MapKeyboardController
 
+  // Temporary
+  private charging = false
+  private chargeStarted = 0
+
   private friends = {}
+  private friendsDusts = {}
 
   private status = {
     isPlay: false,
@@ -473,10 +510,34 @@ class MapRenderer {
     })
   }
 
+  updateFriendsDusts(dusts: { key: string; x: number; y: number }[]) {
+    Object.keys(this.friendsDusts).forEach((key: string) => {
+      if (dusts.find(dust => dust.key === key) == null)
+        delete this.friendsDusts[key]
+    })
+
+    dusts.forEach((dust: any) => {
+      const key = dust.key
+
+      if (this.friendsDusts[key] == null) {
+        this.friendsDusts[key] = {
+          x: dust.x,
+          y: dust.y,
+          targetX: dust.x,
+          targetY: dust.y,
+        }
+      }
+      else {
+        this.friendsDusts[key].targetX = dust.x
+        this.friendsDusts[key].targetY = dust.y
+      }
+    })
+  }
+
   play() { this.status.isPlay = true }
   stop() { this.status.isPlay = false }
 
-  animate(canvas: HTMLCanvasElement, eventListener?: (data: any) => void): void {
+  animate(canvas: HTMLCanvasElement, eventListener?: (type: string, data: any) => void): void {
     if (this.status.isPlay)
       return
 
@@ -485,14 +546,21 @@ class MapRenderer {
     const context = canvas.getContext('2d')
 
     const nextFrame = () => {
-      this.compute(canvas.width, canvas.height)
+      this.compute(canvas.width, canvas.height, eventListener)
 
       if (eventListener) {
-        setTimeout(() => eventListener({
-          x: Math.round(this.actor.centerX),
-          y: Math.round(this.actor.centerY),
-          d: Math.round(this.actor.direction * 1000) / 1000,
-        }))
+        setTimeout(() => {
+          eventListener('position', {
+            x: Math.round(this.actor.centerX),
+            y: Math.round(this.actor.centerY),
+            d: Math.round(this.actor.direction * 1000) / 1000,
+          })
+          eventListener('dusts', this.dusts.map(dust => ({
+            no: dust.no,
+            x: Math.round(dust.centerX),
+            y: Math.round(dust.centerY),
+          })))
+        })
       }
 
       this.render(context, canvas.width, canvas.height)
@@ -504,7 +572,7 @@ class MapRenderer {
     nextFrame()
   }
 
-  private compute(width: number, height: number): void {
+  private compute(width: number, height: number, eventListener?: (type: string, data: any) => void): void {
     this.camera.setViewportSize(width, height)
 
     // Compute Chara Position by Keys
@@ -526,17 +594,42 @@ class MapRenderer {
 
     for (const cid in this.friends) {
       const friend = this.friends[cid]
-      friend.x += (friend.targetX - friend.x) * 0.2
-      friend.y += (friend.targetY - friend.y) * 0.2
-      friend.direction += (friend.targetDirection - friend.direction) * 0.2
+      friend.x += (friend.targetX - friend.x) * 0.4
+      friend.y += (friend.targetY - friend.y) * 0.4
+      friend.direction += (friend.targetDirection - friend.direction) * 0.4
+    }
+
+    for (const key in this.friendsDusts) {
+      const dust = this.friendsDusts[key]
+      dust.x += (dust.targetX - dust.x) * 0.2
+      dust.y += (dust.targetY - dust.y) * 0.2
     }
 
     this.camera.moveTo(this.actor.centerX, this.actor.centerY)
 
-    if (this.controller.action)
-      this.dusts.push(MapDust.createWithPositionAndDirection({ x: this.actor.centerX, y: this.actor.centerY }, { width: 10, height: 10 }, this.actor.direction))
+    if (this.controller.action) {
+      if (!this.charging) {
+        this.charging = true
+        this.chargeStarted = Date.now()
+      }
+    }
+    else {
+      if (this.charging) {
+        const chargeRatio = Math.min((Date.now() - this.chargeStarted) * 0.001, 1)
+        this.charging = false
+        this.chargeStarted = null
+        this.dusts.push(MapDust.createWithPositionAndDirection({ x: this.actor.centerX, y: this.actor.centerY }, { width: 10, height: 10 }, this.actor.direction, chargeRatio))
+      }
+    }
 
-    this.dusts.forEach(dust => dust.compute(this.ground))
+    this.dusts.forEach((dust) => {
+      dust.computeWithGround(this.ground)
+      const hitCid = dust.computeWithFriends(this.friends)
+      if (hitCid != null) {
+        if (eventListener)
+          eventListener('hit', { target: hitCid })
+      }
+    })
 
     for (let i = this.dusts.length - 1; i >= 0; i--) {
       if (Math.abs(this.dusts[i].movingAcceleration) < 0.1)
@@ -578,6 +671,16 @@ class MapRenderer {
     }
 
     this.dusts.forEach(dust => dust.render(context))
+
+    for (const key in this.friendsDusts) {
+      const dust = this.friendsDusts[key]
+      context.strokeStyle = 'gray'
+      context.save()
+      context.translate(dust.x, dust.y)
+      // context.rotate(Date.now() / 1000)
+      context.strokeRect(-10 * 0.5, -10 * 0.5, 10, 10)
+      context.restore()
+    }
 
     context.restore()
   }
@@ -633,7 +736,7 @@ export default {
       canvas.value.width = props.width || canvas.value.clientWidth
       canvas.value.height = props.height || canvas.value.clientHeight
 
-      renderer.animate(canvas.value, data => emit('event', data))
+      renderer.animate(canvas.value, (type: string, data: any) => emit('event', type, data))
     })
 
     onUnmounted(() => {
@@ -654,11 +757,21 @@ export default {
       renderer.updateFriends(friends)
     }
 
+    const updateFriendsDusts = (dusts: { key: string; x: number; y: number }[]): void => {
+      renderer.updateFriendsDusts(dusts)
+    }
+
+    const gameOver = (): void => {
+      renderer.stop()
+    }
+
     return {
       canvas,
       onKeyDown,
       onKeyUp,
       updateFriends,
+      updateFriendsDusts,
+      gameOver,
     }
   },
 }
