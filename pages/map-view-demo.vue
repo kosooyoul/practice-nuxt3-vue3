@@ -30,20 +30,11 @@ export default {
           const friends = data.friends.filter((friend: any) => friend.cid !== this.cid)
           mapView.updateFriends(friends)
         }
-        else if (data.type === 'dusts') {
-          const tempDusts = data.dusts.filter((dust: any) => dust.cid !== this.cid)
-          const dusts = []
-          tempDusts.forEach((tempDust) => {
-            tempDust.data.forEach((dust) => {
-              dusts.push({
-                key: `${tempDust.cid}.${dust.no}`,
-                x: dust.x,
-                y: dust.y,
-              })
-            })
-          })
-          console.log('dusts', JSON.stringify(dusts))
-          mapView.updateFriendsDusts(dusts)
+        else if (data.type === 'dust') {
+          if (data.cid != this.cid) {
+            console.log('dust', JSON.stringify(data.dust))
+            mapView.createFriendsDust(data.dust)
+          }
         }
         else if (data.type === 'dead') {
           mapView.gameOver()
@@ -74,7 +65,8 @@ export default {
       this.connection.onerror = onerror
     }
 
-    this.connection = new WebSocket('wss://components.auoi.net/ws')
+    // this.connection = new WebSocket('wss://components.auoi.net/ws')
+    this.connection = new WebSocket('ws://localhost:60000')
     this.connection.onopen = onopen
   },
   methods: {

@@ -214,22 +214,22 @@ class MapDust {
       if (isInAxisX && isCrossedFromTop) {
         newCenterY = prop.top
         this.direction = -this.direction
-        this.movingAcceleration *= 0.2
+        this.movingAcceleration *= 0.5
       }
       else if (isInAxisX && isCrossedFromBottom) {
         newCenterY = prop.bottom
         this.direction = -this.direction
-        this.movingAcceleration *= 0.2
+        this.movingAcceleration *= 0.5
       }
       else if (isInAxisY && isCrossedFromLeft) {
         newCenterX = prop.left
         this.direction = -Math.PI - this.direction
-        this.movingAcceleration *= 0.2
+        this.movingAcceleration *= 0.5
       }
       else if (isInAxisY && isCrossedFromRight) {
         newCenterX = prop.right
         this.direction = -Math.PI - this.direction
-        this.movingAcceleration *= 0.2
+        this.movingAcceleration *= 0.5
       }
       else if (isInAxisX && isInAxisY) {
         if (newCenterX < prop.left)
@@ -470,7 +470,7 @@ class MapRenderer {
   private chargeStarted = 0
 
   private friends = {}
-  private friendsDusts = {}
+  private friendsDusts = []
 
   private status = {
     isPlay: false,
@@ -510,28 +510,9 @@ class MapRenderer {
     })
   }
 
-  updateFriendsDusts(dusts: { key: string; x: number; y: number }[]) {
-    Object.keys(this.friendsDusts).forEach((key: string) => {
-      if (dusts.find(dust => dust.key === key) == null)
-        delete this.friendsDusts[key]
-    })
-
-    dusts.forEach((dust: any) => {
-      const key = dust.key
-
-      if (this.friendsDusts[key] == null) {
-        this.friendsDusts[key] = {
-          x: dust.x,
-          y: dust.y,
-          targetX: dust.x,
-          targetY: dust.y,
-        }
-      }
-      else {
-        this.friendsDusts[key].targetX = dust.x
-        this.friendsDusts[key].targetY = dust.y
-      }
-    })
+  createFriendsDust(dust: { x: number; y: number; d: number; r: number }) {
+    console.log('createFriendsDust', dust)
+    this.dusts.push(MapDust.createWithPositionAndDirection({ x: dust.x, y: dust.y }, { width: 10, height: 10 }, dust.d, dust.r))
   }
 
   play() { this.status.isPlay = true }
@@ -555,11 +536,6 @@ class MapRenderer {
             y: Math.round(this.actor.centerY),
             d: Math.round(this.actor.direction * 1000) / 1000,
           })
-          eventListener('dusts', this.dusts.map(dust => ({
-            no: dust.no,
-            x: Math.round(dust.centerX),
-            y: Math.round(dust.centerY),
-          })))
         })
       }
 
@@ -619,6 +595,13 @@ class MapRenderer {
         this.charging = false
         this.chargeStarted = null
         this.dusts.push(MapDust.createWithPositionAndDirection({ x: this.actor.centerX, y: this.actor.centerY }, { width: 10, height: 10 }, this.actor.direction, chargeRatio))
+
+        eventListener('dust', {
+          x: Math.round(this.actor.centerX),
+          y: Math.round(this.actor.centerY),
+          d: Math.round(this.actor.direction * 1000) / 1000,
+          r: Math.round(chargeRatio * 1000) / 1000,
+        })
       }
     }
 
@@ -631,9 +614,18 @@ class MapRenderer {
       }
     })
 
+    this.friendsDusts.forEach((dust) => {
+      dust.computeWithGround(this.ground)
+    })
+
     for (let i = this.dusts.length - 1; i >= 0; i--) {
       if (Math.abs(this.dusts[i].movingAcceleration) < 0.1)
         this.dusts.splice(i, 1)
+    }
+
+    for (let i = this.friendsDusts.length - 1; i >= 0; i--) {
+      if (Math.abs(this.friendsDusts[i].movingAcceleration) < 0.1)
+        this.friendsDusts.splice(i, 1)
     }
   }
 
@@ -671,16 +663,7 @@ class MapRenderer {
     }
 
     this.dusts.forEach(dust => dust.render(context))
-
-    for (const key in this.friendsDusts) {
-      const dust = this.friendsDusts[key]
-      context.strokeStyle = 'gray'
-      context.save()
-      context.translate(dust.x, dust.y)
-      // context.rotate(Date.now() / 1000)
-      context.strokeRect(-10 * 0.5, -10 * 0.5, 10, 10)
-      context.restore()
-    }
+    // this.friendsDusts.forEach(dust => dust.render(context))
 
     context.restore()
   }
@@ -757,8 +740,8 @@ export default {
       renderer.updateFriends(friends)
     }
 
-    const updateFriendsDusts = (dusts: { key: string; x: number; y: number }[]): void => {
-      renderer.updateFriendsDusts(dusts)
+    const createFriendsDust = (dust: { x: number; y: number; d: number; r: number }): void => {
+      renderer.createFriendsDust(dust)
     }
 
     const gameOver = (): void => {
@@ -770,7 +753,7 @@ export default {
       onKeyDown,
       onKeyUp,
       updateFriends,
-      updateFriendsDusts,
+      createFriendsDust,
       gameOver,
     }
   },
