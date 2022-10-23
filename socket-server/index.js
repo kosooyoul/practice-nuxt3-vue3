@@ -56,9 +56,8 @@ wss.on('connection', (ws) => {
         client.position = payload.data
         client.positionUpdated = true
       }
-      else if (payload.type === 'dusts') {
-        client.dusts = payload.data
-        client.dustsUpdated = true
+      else if (payload.type === 'dust') {
+        broadcast({ type: 'dust', cid: client.id, dust: payload.data })
       }
       else if (payload.type === 'hit') {
         const target = payload.data?.target
@@ -106,26 +105,8 @@ const broadcastFriends = () => {
   broadcast(message)
 }
 
-const broadcastDusts = () => {
-  const message = { type: 'dusts', dusts: [] }
-
-  for (const id in clientsById) {
-    const client = clientsById[id]
-    if (client.dusts && client.dustsUpdated) {
-      message.dusts.push({ cid: client.id, data: client.dusts })
-      client.dustsUpdated = false
-    }
-  }
-
-  if (message.dusts.length === 0)
-    return
-
-  broadcast(message)
-}
-
 setInterval(() => {
   broadcastFriends()
-  broadcastDusts()
 }, 100)
 
 // For WebSocket
