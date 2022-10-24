@@ -111,12 +111,12 @@ export default {
 
       controls.update()
       if (gyroscope) {
-        scenes.left?.rotateY(gyroscope.y)
-        scenes.left?.rotateX(gyroscope.x)
-        scenes.right?.rotateY(gyroscope.y)
-        scenes.right?.rotateX(gyroscope.x)
-        scenes.center?.rotateY(gyroscope.y)
-        scenes.center?.rotateX(gyroscope.x)
+        scenes.left?.rotateY(gyroscope.y * Math.PI / 180)
+        scenes.left?.rotateX(gyroscope.x * Math.PI / 180)
+        scenes.right?.rotateY(gyroscope.y * Math.PI / 180)
+        scenes.right?.rotateX(gyroscope.x * Math.PI / 180)
+        scenes.center?.rotateY(gyroscope.y * Math.PI / 180)
+        scenes.center?.rotateX(gyroscope.x * Math.PI / 180)
       }
 
       if (stereoMode.value || (fullScreenMode.value && props.stereo)) {
