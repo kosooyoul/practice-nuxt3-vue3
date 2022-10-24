@@ -2,11 +2,20 @@
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 
+class OrbisStereoProps {
+  left: string
+  right: string
+}
+
 export default {
   name: 'OrbisView',
   props: {
     src: {
       type: String,
+      required: false,
+    },
+    stereo: {
+      type: OrbisStereoProps,
       required: false,
     },
     width: {
@@ -22,12 +31,17 @@ export default {
     const canvas: { value: HTMLCanvasElement | null } = ref(null)
     let renderer: THREE.WebGLRenderer = null
     let camera: THREE.PerspectiveCamera = null
-    let scene: THREE.Scene = null
+    const scenes: { center?: THREE.Scene; left?: THREE.Scene; right?: THREE.Scene } = {}
     let controls: OrbitControls = null
 
+    const fullScreenMode = ref(false)
+    const stereoMode = ref(false)
+
     const fullscreenModeChanged = () => {
-      if (!document.fullscreenElement)
+      if (!document.fullscreenElement) {
         renderer.setSize(props.width, props.height)
+        fullScreenMode.value = false
+      }
     }
 
     const sizeChanged = () => {
@@ -36,7 +50,7 @@ export default {
       camera.updateProjectionMatrix()
     }
 
-    const getOrbisScene = () => {
+    const getOrbisScene = (src: string) => {
       const scene = new THREE.Scene()
 
       const sphere = new THREE.Group()
@@ -44,13 +58,13 @@ export default {
 
       const geometry = new THREE.SphereGeometry(100, 20, 20, 0, Math.PI * 2, 0, Math.PI * 2)
       let material: THREE.MeshBasicMaterial
-      if (props.src == null) {
+      if (src == null) {
         material = new THREE.MeshBasicMaterial({ color: 0xD0D0D0, wireframe: true, side: THREE.BackSide })
       }
       else {
         material = new THREE.MeshBasicMaterial({ side: THREE.BackSide })
 
-        const texture = new THREE.TextureLoader().load(props.src)
+        const texture = new THREE.TextureLoader().load(src)
         texture.wrapS = THREE.RepeatWrapping
         texture.wrapT = THREE.RepeatWrapping
         texture.repeat.set(1, 2)
@@ -86,7 +100,17 @@ export default {
       sizeChanged()
 
       controls.update()
-      renderer.render(scene, camera)
+
+      if (stereoMode.value || (fullScreenMode.value && props.stereo)) {
+        renderer.setViewport(0, 0, canvas.value.clientWidth / 2, canvas.value.clientHeight)
+        renderer.render(scenes.left, camera)
+        renderer.setViewport(canvas.value.clientWidth / 2, 0, canvas.value.clientWidth / 2, canvas.value.clientHeight)
+        renderer.render(scenes.right, camera)
+      }
+      else {
+        renderer.setViewport(0, 0, canvas.value.clientWidth, canvas.value.clientHeight)
+        renderer.render(scenes.center, camera)
+      }
 
       requestAnimationFrame(() => animate())
     }
@@ -102,11 +126,19 @@ export default {
       })
       renderer.setSize(width, height)
       renderer.setClearColor(0x000000, 0)
+      renderer.autoClear = false
 
       camera = new THREE.PerspectiveCamera(60, width / height * 2, 0.1, 1000)
 
       controls = getOrbisControls(canvas.value, camera)
-      scene = getOrbisScene()
+      if (props.stereo) {
+        scenes.left = getOrbisScene(props.stereo.left)
+        scenes.right = getOrbisScene(props.stereo.right)
+        scenes.center = scenes.left
+      }
+      else {
+        scenes.center = getOrbisScene(props.src)
+      }
 
       document.addEventListener('fullscreenchange', fullscreenModeChanged)
 
@@ -118,20 +150,48 @@ export default {
       renderer.dispose()
     })
 
+    const toggleFullscreenMode = () => {
+      canvas.value.requestFullscreen()
+      fullScreenMode.value = !fullScreenMode.value
+    }
+
+    const toggleStereoMode = () => {
+      stereoMode.value = !stereoMode.value
+    }
+
     return {
+      stereoMode,
       canvas,
+      toggleFullscreenMode,
+      toggleStereoMode,
     }
   },
 }
 </script>
 
 <template>
-  <canvas ref="canvas" />
+  <div class="orbis-view">
+    <canvas ref="canvas" />
+    <button style="position: absolute; top: 8px; right: 8px; width: 32px; height: 32px; margin: 0px; padding: 0px; border: 1px solid #999; border-radius: 4px;" @click="toggleFullscreenMode">
+      F
+    </button>
+    <button v-if="stereo" style="position: absolute; top: 8px; right: 48px; width: 32px; height: 32px; margin: 0px; padding: 0px; border: 1px solid #999; border-radius: 4px;" @click="toggleStereoMode">
+      S
+    </button>
+  </div>
 </template>
 
 <style scoped>
-canvas:not(:root):fullscreen {
+.orbis-view {
+  display: inline-block;
+  position: relative;
+  margin: 0px;
+  padding: 0px;
+  overflow: hidden;
+  font-size: 0px;
+}
+.orbis-view>canvas:not(:root):fullscreen {
   /* TODO: Fullscreen mode styles */
-  filter: sepia(1);
+  /* filter: sepia(1); */
 }
 </style>

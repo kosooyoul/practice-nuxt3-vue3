@@ -104,6 +104,12 @@ export default {
     </section>
     <section>
       <h2>4. OrbisView</h2>
+      <OrbisView
+        class="orbis-view" :stereo="{
+          left: '/textures/20221024.left.jpg',
+          right: '/textures/20221024.right.jpg',
+        }" :width="300" :height="200"
+      />
       <OrbisView class="orbis-view" src="/textures/20180924.jpg" :width="300" :height="200" />
       <OrbisView class="orbis-view" :width="300" :height="200" />
     </section>
