@@ -110,7 +110,7 @@ export default {
           right: '/textures/20221024.right.jpg',
         }" :width="300" :height="200"
       />
-      <OrbisView class="orbis-view" src="/textures/20180924.jpg" :width="300" :height="200" />
+      <OrbisView class="orbis-view" src="/textures/20180924.jpg" :width="300" :height="200" :autospin="true" />
       <OrbisView class="orbis-view" :width="300" :height="200" />
     </section>
     <section>

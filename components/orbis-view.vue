@@ -15,7 +15,7 @@ export default {
       required: false,
     },
     stereo: {
-      type: OrbisStereoProps,
+      type: Object, // OrbisStereoProps
       required: false,
     },
     width: {
@@ -26,6 +26,10 @@ export default {
       type: Number,
       required: false,
     },
+    autospin: {
+      type: Boolean,
+      required: false,
+    },
   },
   setup(props: any) {
     const canvas: { value: HTMLCanvasElement | null } = ref(null)
@@ -33,6 +37,7 @@ export default {
     let camera: THREE.PerspectiveCamera = null
     const scenes: { center?: THREE.Scene; left?: THREE.Scene; right?: THREE.Scene } = {}
     let controls: OrbitControls = null
+    let gyroscope: any = null
 
     const fullScreenMode = ref(false)
     const stereoMode = ref(false)
@@ -80,8 +85,13 @@ export default {
 
     const getOrbisControls = (canvas: HTMLCanvasElement, camera: THREE.Camera) => {
       const controls = new OrbitControls(camera, canvas)
-      controls.autoRotate = true
-      controls.autoRotateSpeed = 1
+      if (props.autospin) {
+        controls.autoRotate = true
+        controls.autoRotateSpeed = 1
+      }
+      else {
+        controls.autoRotate = false
+      }
       controls.dampingFactor = 0.1
       controls.enableDamping = true
       controls.zoomSpeed = 4
@@ -100,6 +110,14 @@ export default {
       sizeChanged()
 
       controls.update()
+      if (gyroscope) {
+        scenes.left?.rotateY(gyroscope.y)
+        scenes.left?.rotateX(gyroscope.x)
+        scenes.right?.rotateY(gyroscope.y)
+        scenes.right?.rotateX(gyroscope.x)
+        scenes.center?.rotateY(gyroscope.y)
+        scenes.center?.rotateX(gyroscope.x)
+      }
 
       if (stereoMode.value || (fullScreenMode.value && props.stereo)) {
         renderer.setViewport(0, 0, canvas.value.clientWidth / 2, canvas.value.clientHeight)
@@ -142,12 +160,20 @@ export default {
 
       document.addEventListener('fullscreenchange', fullscreenModeChanged)
 
+      if (globalThis.Gyroscope) {
+        gyroscope = new globalThis.Gyroscope({ frequency: 30 })
+        gyroscope.start()
+      }
+
       animate()
     })
 
     onUnmounted(() => {
       document.removeEventListener('fullscreenchange', fullscreenModeChanged)
       renderer.dispose()
+
+      if (gyroscope)
+        gyroscope.stop()
     })
 
     const toggleFullscreenMode = () => {
