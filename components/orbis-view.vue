@@ -37,7 +37,9 @@ export default {
     let camera: THREE.PerspectiveCamera = null
     const scenes: { center?: THREE.Scene; left?: THREE.Scene; right?: THREE.Scene } = {}
     let controls: OrbitControls = null
-    let gyroscope: any = null
+    let sensor: any = null
+
+    const listeners: ((x: number, y: number, z: number) => void)[] = []
 
     const fullScreenMode = ref(false)
     const stereoMode = ref(false)
@@ -80,6 +82,10 @@ export default {
       const mesh = new THREE.Mesh(geometry, material)
       sphere.add(mesh)
 
+      listeners.push((x: number, y: number, z: number) => {
+        mesh.rotation.x = x * Math.PI / 180
+      })
+
       return scene
     }
 
@@ -110,13 +116,13 @@ export default {
       sizeChanged()
 
       controls.update()
-      if (gyroscope) {
-        scenes.left?.rotateY(gyroscope.y * Math.PI / 180)
-        scenes.left?.rotateX(gyroscope.x * Math.PI / 180)
-        scenes.right?.rotateY(gyroscope.y * Math.PI / 180)
-        scenes.right?.rotateX(gyroscope.x * Math.PI / 180)
-        scenes.center?.rotateY(gyroscope.y * Math.PI / 180)
-        scenes.center?.rotateX(gyroscope.x * Math.PI / 180)
+      if (sensor) {
+        // scenes.left?.getObjectById(1).rotation.y = Math.PI
+        // scenes.left?.rotateX(gyroscope.x * Math.PI / 180)
+        // scenes.right?.getObjectById(1).rotation.y = Math.PI
+        // scenes.right?.rotateX(gyroscope.x * Math.PI / 180)
+        // scenes.center?.rotateY(gyroscope.y * Math.PI / 180)
+        // scenes.center?.rotateX(gyroscope.x * Math.PI / 180)
       }
 
       if (stereoMode.value || (fullScreenMode.value && props.stereo)) {
@@ -160,9 +166,23 @@ export default {
 
       document.addEventListener('fullscreenchange', fullscreenModeChanged)
 
-      if (globalThis.Gyroscope) {
-        gyroscope = new globalThis.Gyroscope({ frequency: 30 })
-        gyroscope.start()
+      if (globalThis.GravitySensor) {
+        sensor = new globalThis.GravitySensor({ frequency: 30 })
+
+        sensor.addEventListener('reading', () => {
+          // model is a Three.js object instantiated elsewhere.
+          listeners.forEach(listener => listener(sensor.x, sensor.y, sensor.z))
+          // quaternion // [0.0828558628, 0.03671666449, 0.99582031371, 0.0113443967]
+          // alert(JSON.stringify(gyroscope.quaternion))
+        })
+        sensor.addEventListener('error', (error) => {
+          if (error.name === 'NotReadableError') {
+            // eslint-disable-next-line no-alert
+            alert('error')
+          }
+        })
+
+        sensor.start()
       }
 
       animate()
@@ -172,8 +192,8 @@ export default {
       document.removeEventListener('fullscreenchange', fullscreenModeChanged)
       renderer.dispose()
 
-      if (gyroscope)
-        gyroscope.stop()
+      if (sensor)
+        sensor.stop()
     })
 
     const toggleFullscreenMode = () => {
