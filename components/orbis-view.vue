@@ -38,8 +38,10 @@ export default {
     const scenes: { center?: THREE.Scene; left?: THREE.Scene; right?: THREE.Scene } = {}
     let controls: OrbitControls = null
     let sensor: any = null
+    const quaternion: THREE.Quaternion = new THREE.Quaternion()
+    const targetQuaternion: THREE.Quaternion = new THREE.Quaternion()
 
-    const listeners: ((x: number, y: number, z: number) => void)[] = []
+    const listeners: ((quaternion: THREE.Quaternion, roll: number, pitch: number, yaw: number) => void)[] = []
 
     const fullScreenMode = ref(false)
     const stereoMode = ref(false)
@@ -82,9 +84,9 @@ export default {
       const mesh = new THREE.Mesh(geometry, material)
       sphere.add(mesh)
 
-      listeners.push((x: number, y: number, z: number) => {
-        // mesh.rotation.x = x * Math.PI / 180
-        mesh.setRotationFromEuler(new THREE.Euler(-x + Math.PI * 0.5, -z - Math.PI * 0.5, 0))
+      listeners.push((quaternion: THREE.Quaternion, roll: number, pitch: number, yaw: number) => {
+        const euler = new THREE.Euler(-roll + Math.PI * 0.5, -yaw - Math.PI * 0.5, 0)
+        mesh.setRotationFromEuler(euler)
       })
 
       return scene
@@ -117,14 +119,25 @@ export default {
       sizeChanged()
 
       controls.update()
-      if (sensor) {
-        // scenes.left?.getObjectById(1).rotation.y = Math.PI
-        // scenes.left?.rotateX(gyroscope.x * Math.PI / 180)
-        // scenes.right?.getObjectById(1).rotation.y = Math.PI
-        // scenes.right?.rotateX(gyroscope.x * Math.PI / 180)
-        // scenes.center?.rotateY(gyroscope.y * Math.PI / 180)
-        // scenes.center?.rotateX(gyroscope.x * Math.PI / 180)
-      }
+
+      quaternion.slerp(targetQuaternion, 0.2)
+
+      // roll (x-axis rotation)
+      const sinr_cosp = 2 * (quaternion.w * quaternion.x + quaternion.y * quaternion.z)
+      const cosr_cosp = 1 - 2 * (quaternion.x * quaternion.x + quaternion.y * quaternion.y)
+      const roll = Math.atan2(sinr_cosp, cosr_cosp)
+
+      // pitch (y-axis rotation)
+      const copySign = (x: number, y: number): number => Math.sign(x) === Math.sign(y) ? x : -x
+      const sinp = 2 * (quaternion.w * quaternion.y - quaternion.z * quaternion.x)
+      const pitch = (Math.abs(sinp) >= 1) ? copySign(Math.PI / 2, sinp) : Math.asin(sinp) // use 90 degrees if out of range
+
+      // yaw (z-axis rotation)
+      const siny_cosp = 2 * (quaternion.w * quaternion.z + quaternion.x * quaternion.y)
+      const cosy_cosp = 1 - 2 * (quaternion.y * quaternion.y + quaternion.z * quaternion.z)
+      const yaw = Math.atan2(siny_cosp, cosy_cosp)
+
+      listeners.forEach(listener => listener(quaternion, roll, pitch, yaw))
 
       if (stereoMode.value || (fullScreenMode.value && props.stereo)) {
         renderer.setViewport(0, 0, canvas.value.clientWidth / 2, canvas.value.clientHeight)
@@ -172,28 +185,8 @@ export default {
 
         sensor.addEventListener('reading', () => {
           // model is a Three.js object instantiated elsewhere.
-          const q = new THREE.Quaternion(...sensor.quaternion)
+          targetQuaternion.set(sensor.quaternion[0], sensor.quaternion[1], sensor.quaternion[2], sensor.quaternion[3])
 
-          // roll (x-axis rotation)
-          const sinr_cosp = 2 * (q.w * q.x + q.y * q.z)
-          const cosr_cosp = 1 - 2 * (q.x * q.x + q.y * q.y)
-          const roll = Math.atan2(sinr_cosp, cosr_cosp)
-
-          // pitch (y-axis rotation)
-          const sinp = 2 * (q.w * q.y - q.z * q.x)
-          let pitch
-          const copySign = (x, y) => Math.sign(x) === Math.sign(y) ? x : -x
-          if (Math.abs(sinp) >= 1)
-            pitch = copySign(Math.PI / 2, sinp) // use 90 degrees if out of range
-          else
-            pitch = Math.asin(sinp)
-
-          // yaw (z-axis rotation)
-          const siny_cosp = 2 * (q.w * q.z + q.x * q.y)
-          const cosy_cosp = 1 - 2 * (q.y * q.y + q.z * q.z)
-          const yaw = Math.atan2(siny_cosp, cosy_cosp)
-
-          listeners.forEach(listener => listener(roll, pitch, yaw))
           // quaternion // [0.0828558628, 0.03671666449, 0.99582031371, 0.0113443967]
           // alert(JSON.stringify(gyroscope.quaternion))
         })
