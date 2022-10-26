@@ -105,13 +105,42 @@ export default {
     <section>
       <h2>4. OrbisView</h2>
       <OrbisView
-        class="orbis-view" :stereo="{
-          left: '/textures/20221024.left.jpg',
-          right: '/textures/20221024.right.jpg',
-        }" :width="300" :height="200"
+        class="orbis-view"
+        left-src="/textures/20221024.left.jpg"
+        right-src="/textures/20221024.right.jpg"
+        :width="300"
+        :height="200"
+        :sensor="true"
+        :stereo="true"
+        :fullscreen="true"
+        :autospin="true"
       />
-      <OrbisView class="orbis-view" src="/textures/20180924.jpg" :width="300" :height="200" :autospin="true" />
-      <OrbisView class="orbis-view" :width="300" :height="200" />
+      <OrbisView
+        class="orbis-view"
+        src="/textures/20180924.jpg"
+        :width="300"
+        :height="200"
+        :stereo="true"
+        :fullscreen="true"
+        :autospin="true"
+      />
+      <OrbisView
+        class="orbis-view"
+        center-src="/textures/20180924.jpg"
+        left-src="/textures/20221024.left.jpg"
+        right-src="/textures/20221024.right.jpg"
+        :width="300"
+        :height="200"
+        :stereo="true"
+        :autospin="true"
+      />
+      <OrbisView
+        class="orbis-view"
+        :width="300"
+        :height="200"
+        :fullscreen="true"
+        :sensor="true"
+      />
     </section>
     <section>
       <h2>3. BubbleButtonView</h2>
