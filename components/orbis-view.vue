@@ -83,8 +83,8 @@ export default {
       sphere.add(mesh)
 
       listeners.push((x: number, y: number, z: number) => {
-        mesh.rotation.x = x * Math.PI / 180
-        mesh.setRotationFromEuler(new THREE.Euler(0, x, 0))
+        // mesh.rotation.x = x * Math.PI / 180
+        mesh.setRotationFromEuler(new THREE.Euler(-x + Math.PI * 0.5, -z - Math.PI * 0.5, 0))
       })
 
       return scene
@@ -188,7 +188,12 @@ export default {
           else
             pitch = Math.asin(sinp)
 
-          listeners.forEach(listener => listener(roll, pitch, 0))
+          // yaw (z-axis rotation)
+          const siny_cosp = 2 * (q.w * q.z + q.x * q.y)
+          const cosy_cosp = 1 - 2 * (q.y * q.y + q.z * q.z)
+          const yaw = Math.atan2(siny_cosp, cosy_cosp)
+
+          listeners.forEach(listener => listener(roll, pitch, yaw))
           // quaternion // [0.0828558628, 0.03671666449, 0.99582031371, 0.0113443967]
           // alert(JSON.stringify(gyroscope.quaternion))
         })
