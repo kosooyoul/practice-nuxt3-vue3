@@ -84,6 +84,7 @@ export default {
 
       listeners.push((x: number, y: number, z: number) => {
         mesh.rotation.x = x * Math.PI / 180
+        mesh.setRotationFromEuler(new THREE.Euler(0, x, 0))
       })
 
       return scene
@@ -166,12 +167,28 @@ export default {
 
       document.addEventListener('fullscreenchange', fullscreenModeChanged)
 
-      if (globalThis.GravitySensor) {
-        sensor = new globalThis.GravitySensor({ frequency: 30 })
+      if (globalThis.AbsoluteOrientationSensor) {
+        sensor = new globalThis.AbsoluteOrientationSensor({ frequency: 30 })
 
         sensor.addEventListener('reading', () => {
           // model is a Three.js object instantiated elsewhere.
-          listeners.forEach(listener => listener(sensor.x, sensor.y, sensor.z))
+          const q = new THREE.Quaternion(...sensor.quaternion)
+
+          // roll (x-axis rotation)
+          const sinr_cosp = 2 * (q.w * q.x + q.y * q.z)
+          const cosr_cosp = 1 - 2 * (q.x * q.x + q.y * q.y)
+          const roll = Math.atan2(sinr_cosp, cosr_cosp)
+
+          // pitch (y-axis rotation)
+          const sinp = 2 * (q.w * q.y - q.z * q.x)
+          let pitch
+          const copySign = (x, y) => Math.sign(x) === Math.sign(y) ? x : -x
+          if (Math.abs(sinp) >= 1)
+            pitch = copySign(Math.PI / 2, sinp) // use 90 degrees if out of range
+          else
+            pitch = Math.asin(sinp)
+
+          listeners.forEach(listener => listener(roll, pitch, 0))
           // quaternion // [0.0828558628, 0.03671666449, 0.99582031371, 0.0113443967]
           // alert(JSON.stringify(gyroscope.quaternion))
         })
