@@ -50,7 +50,7 @@ class OrientationSensor {
   }
 }
 
-interface OrbitAnimaterOptions {
+interface OrbisRendererOptions {
   width: number
   height: number
   images: {
@@ -61,9 +61,9 @@ interface OrbitAnimaterOptions {
   enableAutoSpin?: boolean
 }
 
-class OrbisAnimater {
+class OrbisRenderer {
   private canvas: HTMLCanvasElement
-  private options: OrbitAnimaterOptions
+  private options: OrbisRendererOptions
 
   private width: number
   private height: number
@@ -84,7 +84,7 @@ class OrbisAnimater {
     fitSizeMode: false,
   }
 
-  constructor(canvas: HTMLCanvasElement, options: OrbitAnimaterOptions) {
+  constructor(canvas: HTMLCanvasElement, options: OrbisRendererOptions) {
     this.width = options.width || canvas.clientWidth
     this.height = options.height || canvas.clientHeight
 
@@ -327,7 +327,7 @@ export default {
     const root: { value: HTMLElement | null } = ref(null)
     const canvas: { value: HTMLCanvasElement | null } = ref(null)
 
-    let animater: OrbisAnimater = null
+    let orbisRenderer: OrbisRenderer = null
     let sensor: any = null
 
     const status = ref({ fullscreenMode: false, stereoMode: false, sensorMode: false })
@@ -336,7 +336,7 @@ export default {
       const width = props.width || canvas.value.clientWidth
       const height = props.height || canvas.value.clientHeight
 
-      animater = new OrbisAnimater(canvas.value, {
+      orbisRenderer = new OrbisRenderer(canvas.value, {
         width,
         height,
         images: {
@@ -349,11 +349,11 @@ export default {
 
       sensor = new OrientationSensor()
 
-      animater.animate()
+      orbisRenderer.animate()
     })
 
     onUnmounted(() => {
-      animater.dispose()
+      orbisRenderer.dispose()
 
       sensor.stop()
     })
@@ -362,14 +362,14 @@ export default {
       root.value.requestFullscreen()
 
       status.value.fullscreenMode = true
-      animater.setFitSizeMode(true)
+      orbisRenderer.setFitSizeMode(true)
 
       const onFullscreenModeChanged = () => {
         if (document.fullscreenElement)
           return
 
         status.value.fullscreenMode = false
-        animater.setFitSizeMode(false)
+        orbisRenderer.setFitSizeMode(false)
         document.removeEventListener('fullscreenchange', onFullscreenModeChanged)
       }
 
@@ -378,14 +378,14 @@ export default {
 
     const toggleStereoMode = () => {
       status.value.stereoMode = !status.value.stereoMode
-      animater.setStereoMode(status.value.stereoMode)
+      orbisRenderer.setStereoMode(status.value.stereoMode)
     }
 
     const toggleSensorMode = () => {
       status.value.sensorMode = !status.value.sensorMode
-      animater.setSensorMode(status.value.sensorMode)
+      orbisRenderer.setSensorMode(status.value.sensorMode)
       if (status.value.sensorMode) {
-        sensor.setListener((quaternion: any) => animater.setRotationTarget(quaternion))
+        sensor.setListener((quaternion: any) => orbisRenderer.setRotationTarget(quaternion))
         sensor.start()
       }
       else {
