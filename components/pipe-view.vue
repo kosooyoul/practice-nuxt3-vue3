@@ -31,10 +31,10 @@ defineComponent({
   <div class="root">
     <div class="pipe">
       <div class="circle">
-        <h3 class="title" style="color: #000; font-weight: bold; font-size: 14px;">
+        <h3 class="title">
           {{ title }}
         </h3>
-        <p class="description" style="color: #000; font-size: 12px;">
+        <p class="description">
           {{ description }}
         </p>
       </div>
@@ -91,12 +91,15 @@ div.circle>h3.title {
   padding: 0px;
   font-weight: bold;
   font-size: 14px;
+  text-align: center;
   color: black;
 }
 div.circle>p.description {
   margin: 0px;
   padding: 0px;
-  font-size: 12px;
+  font-size: 10px;
+  text-align: center;
+  white-space: pre-wrap;
   color: black;
 }
 ul.summaries {
@@ -116,5 +119,6 @@ li.summary>h4.title {
 li.summary>p.description {
   margin: 0px;
   font-size: 14px;
+  white-space: pre-wrap;
 }
 </style>
