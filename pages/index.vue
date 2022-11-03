@@ -1,3 +1,4 @@
+import { MapboxView } from '../.nuxt/components';
 <script lang="ts">
 export default {
   name: 'IndexPage',
@@ -54,7 +55,7 @@ export default {
 </script>
 
 <template>
-  <div>
+  <NuxtLayout name="default">
     <header>
       <h1>Nuxt3+Vue3 Components</h1>
     </header>
@@ -62,6 +63,10 @@ export default {
       <h2>Working...</h2>
       <MyWebglView />
       <MyThreejsSampleView />
+    </section>
+    <section>
+      <h2>8. MapboxTerrainView</h2>
+      <MapboxTerrainView access-token="pk.eyJ1Ijoic29jaWFsZXhwbG9yZXIiLCJhIjoiREFQbXBISSJ9.dwFTwfSaWsHvktHrRtpydQ" />
     </section>
     <section>
       <h2>7. RecycleSlideView</h2>
@@ -171,7 +176,7 @@ export default {
         by Kosooyoul
       </p>
     </footer>
-  </div>
+  </NuxtLayout>
 </template>
 
 <style scoped>
