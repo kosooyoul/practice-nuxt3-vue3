@@ -21,7 +21,8 @@
     "gl-matrix": "^3.4.3",
     "gsap": "^3.10.3",
     "mapbox-gl": "^2.10.0",
-    "three": "^0.136.0"
+    "three": "^0.136.0",
+    "@mapbox/mapbox-gl-geocoder": "^5.0.1"
   },
   "devDependencies": {
     "@antfu/eslint-config": "*",

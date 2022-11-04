@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { defineComponent } from 'vue'
 import mapboxgl from 'mapbox-gl'
+import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder'
 
 interface MapboxTerrainViewProps {
   accessToken: string
@@ -32,6 +33,13 @@ onMounted(() => {
     // projection: 'globe', // display the map as a 3D globe
     locale: 'korean',
   })
+  map.addControl(new mapboxgl.NavigationControl(), 'top-left')
+  map.addControl(new mapboxgl.FullscreenControl(), 'top-left')
+  map.addControl(new mapboxgl.GeolocateControl(), 'top-left')
+  map.addControl(new MapboxGeocoder({
+    accessToken: mapboxgl.accessToken,
+    mapboxgl,
+  }))
 
   map.on('style.load', () => {
     map.setFog({}) // Set the default atmosphere style
