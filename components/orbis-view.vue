@@ -411,13 +411,13 @@ export default {
     <canvas ref="canvas" />
     <div style="position: absolute; top: 0px; right: 0px; margin: 4px; padding: 0px;">
       <button v-if="sensor" :class="{ on: status.sensorMode }" @click="toggleSensorMode">
-        O
+        🎈
       </button>
       <button v-if="stereo" :class="{ on: status.stereoMode }" @click="toggleStereoMode">
-        S
+        👓
       </button>
       <button v-if="fullscreen" :disabled="status.fullscreenMode" @click="requestFullscreenMode">
-        F
+        🌐
       </button>
     </div>
   </div>
@@ -436,9 +436,15 @@ export default {
   min-width: 32px;
   height: 32px;
   margin: 4px;
-  padding: 8px;
-  border: 1px solid #999;
-  border-radius: 4px;
+  padding: 0px;
+  color: white;
+  font-size: 14px;
+  border: none;
+  background-color: rgba(200, 200, 200, 0.6);
+  border-radius: 12px;
+}
+.orbis-view button:hover {
+  background-color: #c8c8c8;
 }
 .orbis-view button.on {
   background-color: #00e4ff;
